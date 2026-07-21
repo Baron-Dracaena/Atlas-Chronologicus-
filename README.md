@@ -1,6 +1,6 @@
 # Atlas-Chronologicus-
 The World Game over the years
-This was created to dispel propaganda about the geopolitical game of life and its players over the centuries..
+The geopolitical game of life and its players over the centuries..
 I use this for personal study, to ensure accurate mental models
 And to keep reference of what existed where and when, 
 To better understand the zeigeists of nations that shaped culture, music and world view
