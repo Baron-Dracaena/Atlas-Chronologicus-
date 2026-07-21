@@ -148,6 +148,23 @@ input[type=range]::-moz-range-thumb{width:17px;height:17px;border-radius:50%;bac
 .eras button:hover{color:var(--paper);border-color:var(--muted)}
 .eras button.act{color:var(--gold);border-color:var(--gold)}
 
+/* ---------- focus mode ---------- */
+svg.focusing .polity.on{opacity:.20}
+svg.focusing .polity.hi{opacity:1}
+svg.focusing .route.on{opacity:.08}
+svg.focusing .route.rel{opacity:.95}
+svg.focusing .route.hi{opacity:1}
+svg.focusing .lbl.on{opacity:.22}
+svg.focusing .lbl.hi{opacity:.95}
+svg.focusing .city.on{opacity:.3}
+#detail .ctx{font-size:12.5px;color:#5A4B36;margin-top:7px;line-height:1.55}
+#detail .ctx b{font-family:var(--disp);font-weight:400;letter-spacing:.08em;color:var(--gold);text-transform:uppercase;font-size:10.5px}
+#psearchWrap{padding:8px 10px 2px;flex:none}
+#psearch{width:100%;background:rgba(243,236,218,.8);border:1px solid var(--line);color:var(--paper);
+  font-family:var(--mono);font-size:13.5px;padding:6px 9px;outline:none}
+#psearch:focus{border-color:var(--gold)}
+#psearch::placeholder{color:var(--dim);font-style:italic}
+
 /* ---------- frontispiece ---------- */
 #frontis{position:fixed;inset:0;z-index:100;background:var(--panel);background-image:var(--grain);
   display:flex;align-items:center;justify-content:center;padding:22px;transition:opacity .5s}
@@ -254,6 +271,7 @@ input[type=range]::-moz-range-thumb{width:17px;height:17px;border-radius:50%;bac
       <button data-tab="all">Full Index</button>
       <button id="panelHide" aria-label="Hide index" title="Hide index">&raquo;</button>
     </div>
+    <div id="psearchWrap"><input id="psearch" type="search" placeholder="Search empires, routes, events…" autocomplete="off" spellcheck="false"></div>
     <div id="panelBody"></div>
     <div id="detail"></div>
   </aside>
@@ -563,7 +581,27 @@ const POLITIES = [
  poly:[[[30,-1],[35,-1],[39,-5],[39.5,-9],[37,-11.5],[32,-11],[30,-6]],
        [[12,-17.5],[17,-17.5],[19,-22],[18,-27],[15.5,-28.5],[14,-25],[12.5,-20]],
        [[0.5,10.5],[1.6,10.6],[1.9,6.3],[1,6.1],[0.4,8]],
-       [[9.2,6.5],[13,7],[15.5,4],[15,1.5],[11,1.8],[9.4,4]]],lbl:[34.5,-6],lz:1.4}
+       [[9.2,6.5],[13,7],[15.5,4],[15,1.5],[11,1.8],[9.4,4]]],lbl:[34.5,-6],lz:1.4},
+
+/* ---- North America (pre-contact & contact era) ---- */
+{id:'cahokia',n:'Cahokia & the Mississippian world',cat:'samerica',s:1050,e:1350,cap:'Cahokia (Monks Mound)',
+ note:'Around 1050 the city of Cahokia rose almost overnight on the Mississippi — at its height home to perhaps 15–20,000 people, larger than London of the same century, its Monks Mound the biggest earthwork north of Mexico. A shared world of temple-mound towns, maize, and the falcon-dancer iconography of its shell and copper art stretched from the Great Lakes to the Gulf. It left no writing; what is known comes from the mounds themselves and from the oral traditions of descendant nations — Osage, Quapaw, Muscogee — who kept the memory of the mound-builders when colonial writers insisted a "lost race" must have built them.',
+ poly:[[[-91.5,41],[-87.5,40.5],[-85.5,37.5],[-86.5,34],[-89.5,32.5],[-92,34.5],[-92.5,38]]],lbl:[-89.3,37],lz:1.2},
+{id:'haudenosaunee',n:'Haudenosaunee Confederacy',cat:'samerica',s:1142,e:1914,cap:'Onondaga (council fire)',
+ note:'The Great Law of Peace bound five warring nations — Mohawk, Oneida, Onondaga, Cayuga, Seneca (the Tuscarora joined c. 1722) — into one longhouse. Seneca oral tradition ties the founding council to a total solar eclipse, which astronomers can date to 1142. The Confederacy kept its own records: wampum belts such as the Hiawatha Belt encode the union itself, and condoled chiefs recite the Law from them to this day. Its federal structure of a grand council of separate nations was noted with interest by Franklin and later observers of the young United States.',
+ poly:[[[-79.5,44.5],[-74.5,44.8],[-73.5,42.8],[-75.5,41.8],[-79,42]]],lbl:[-76.6,43.3],lz:1.3},
+{id:'chaco',n:'Ancestral Puebloans (Chaco & Mesa Verde)',cat:'samerica',s:850,e:1300,cap:'Pueblo Bonito',
+ note:'From Chaco Canyon a network of Great Houses and engineered roads reached across the Four Corners; Pueblo Bonito alone held some 600 rooms. Scarlet-macaw skeletons and cacao residue in Chacoan cylinder jars prove direct exchange with Mesoamerica, a thousand miles south, traded against turquoise. After the great drought of the late 1200s the people moved — not vanished: Hopi, Zuni and the Rio Grande Pueblos keep detailed migration histories naming these places as the footprints of their ancestors.',
+ poly:[[[-111,38],[-106.5,38],[-105.5,35],[-107.5,33.5],[-110.5,34.5]]],lbl:[-108.4,35.9],lz:1.3},
+{id:'threefires',n:'Anishinaabe (Council of Three Fires)',cat:'samerica',s:800,e:1914,cap:'(Ojibwe · Odawa · Potawatomi)',peoples:true,
+ note:'The alliance of Ojibwe, Odawa and Potawatomi around the upper Great Lakes — by their own tradition formed after a centuries-long migration from the Atlantic, following a vision of the miigis shell. That history is not only oral: it was inscribed on birchbark scrolls (wiigwaasabak), the mnemonic records of the Midewiwin lodge, among the few Indigenous documentary traditions north of Mexico. Masters of the canoe routes, they were the axis of the Great Lakes fur trade and a power the French, British and Americans each had to treat with.',
+ poly:[[[-93,49],[-84,48.5],[-81,45],[-84,42.5],[-89,43],[-93,45.5]]],lbl:[-87.6,46.2],lz:1.2},
+{id:'lakota',n:'Očhéthi Šakówiŋ (Lakota & allies)',cat:'samerica',s:1730,e:1877,cap:'(Seven Council Fires)',peoples:true,
+ note:'With the horse (reaching the Lakota c. 1700s) the Seven Council Fires became the dominant power of the northern plains, pushing west to the Black Hills. They kept their own calendars: winter counts (waníyetu wówapi), spiral pictographic records in which each year is named for its defining event — some, like Battiste Good\’s, reaching back generations. Note for cross-dating: a Lakota year runs winter to winter, so each count-year straddles two Gregorian years. Victors at the Greasy Grass (Little Bighorn, 1876); the Black Hills were seized the following year.',
+ poly:[[[-106,47.5],[-99,47],[-97.5,43.5],[-101,41.5],[-105.5,43]]],lbl:[-102,44.9],lz:1.3},
+{id:'haida',n:'Haida (Xaayda Gwaay)',cat:'samerica',s:800,e:1914,cap:'(Haida Gwaii)',peoples:true,pz:1.15,
+ note:'Sea power of the Northwest Coast: red-cedar canoes that raided and traded from Alaska to Puget Sound, an economy of salmon and potlatch, and the formline art tradition raised in monumental poles. Haida oral literature survives in its own voice — the narratives of Skaay and Ghandl of Skidegate, dictated in Haida in 1900, rank among the great epic poetry of the Americas. Smallpox in 1862 killed perhaps nine in ten; the nation endured.',
+ poly:[[[-133.3,54.3],[-131.4,54.1],[-130.9,52],[-131.9,51.8],[-133.2,53]]],lbl:[-132.6,53.1],lz:1.6},
 ];
 
 /* -------- ROUTES -------- */
@@ -633,7 +671,17 @@ const ROUTES = [
  pts:[[4.8,53],[-12,45],[-22,30],[-28,10],[-30,-10],[-15,-28],[5,-37],[18.4,-35.5],[35,-40],[55,-41],[78,-39],[98,-30],[104,-12],[106.8,-6.1]],arrow:'→ Batavia'},
 {id:'suez',n:'Steam & Suez line · 1869',cat:'steam',s:1869,e:1914,
  note:'The Canal (opened Nov 1869) cut London–Bombay by ~7,000 km, killed the Cape sailing trade, and made Egypt a strategic obsession — occupied within 13 years.',
- pts:[[-1.4,50.9],[-5.5,36.5],[-1,36.8],[9,37.8],[14.5,36],[25,33],[32.3,31.3],[33.5,28],[38,20],[43.5,12.8],[47,11.5],[58,13],[68,11],[73,14],[80,6.5],[95,5.5],[103.8,1.3],[110,8],[114.2,22.3],[123,28],[133,33],[139.7,35.3]],arrow:'→ Bombay · Singapore · Yokohama'}
+ pts:[[-1.4,50.9],[-5.5,36.5],[-1,36.8],[9,37.8],[14.5,36],[25,33],[32.3,31.3],[33.5,28],[38,20],[43.5,12.8],[47,11.5],[58,13],[68,11],[73,14],[80,6.5],[95,5.5],[103.8,1.3],[110,8],[114.2,22.3],[123,28],[133,33],[139.7,35.3]],arrow:'→ Bombay · Singapore · Yokohama'},
+
+{id:'r_missx',n:'Mississippian exchange',cat:'caravan',s:1050,e:1350,dash:true,
+ note:'Lake Superior copper south, Gulf whelk shell north, mica from the Appalachians — the river-borne exchange web centred on Cahokia that carried the Mississippian world\’s prestige goods and its falcon-dancer iconography.',
+ pts:[[-88,47],[-90.06,38.66],[-90.5,35],[-88.5,30.5]]},
+{id:'r_chacomeso',n:'Turquoise–macaw road',cat:'caravan',s:900,e:1450,dash:true,
+ note:'Southwest turquoise moved south; scarlet macaws, copper bells and cacao moved north through Paquimé to the Chacoan Great Houses — hard archaeological proof that the Pueblo Southwest and Mesoamerica were in continuous contact.',
+ pts:[[-107.9,36.06],[-107.95,30.4],[-104,25],[-99.1,19.43]]},
+{id:'r_qhapaq',n:'Qhapaq Ñan (Inca road)',cat:'caravan',s:1438,e:1533,
+ note:'Some 40,000 km of engineered road knit Tawantinsuyu together — chasqui relay runners, suspension bridges, and tampu way-stations. The state\’s records rode with them as khipu, knotted-cord accounts kept by trained khipukamayuq.',
+ pts:[[-78.5,-0.2],[-78.5,-7.2],[-72,-13.53],[-69,-16.5],[-70.6,-33.5]]},
 ];
 
 /* Tordesillas meridian, appears 1494, fades 1750 (Treaty of Madrid) */
@@ -656,7 +704,10 @@ const CITIES = [
 {n:'Cusco',ll:[-71.97,-13.53],s:1200,e:1914},{n:'Potosí',ll:[-65.75,-19.58],s:1545,e:1914},
 {n:'Cartagena',ll:[-75.51,10.4],s:1533,e:1914},{n:'Salvador (Bahia)',ll:[-38.5,-12.97],s:1549,e:1914},
 {n:'Rio de Janeiro',ll:[-43.2,-22.9],s:1565,e:1914},{n:'Tenochtitlan → Mexico City',ll:[-99.13,19.43],s:1325,e:1914},
-{n:'Cape Town',ll:[18.42,-33.92],s:1652,e:1914},{n:'Saint-Louis',ll:[-16.49,16.02],s:1659,e:1914}
+{n:'Cape Town',ll:[18.42,-33.92],s:1652,e:1914},{n:'Saint-Louis',ll:[-16.49,16.02],s:1659,e:1914},
+{n:'Cahokia',ll:[-90.06,38.66],s:1050,e:1350,star:true},{n:'Pueblo Bonito',ll:[-107.9,36.06],s:850,e:1150},
+{n:'Onondaga',ll:[-76.15,43.05],s:1142,e:1914},{n:'Taos Pueblo',ll:[-105.55,36.44],s:1000,e:1914,cz:1.3},
+{n:'Chan Chan',ll:[-79.07,-8.1],s:900,e:1470},{n:'Chichén Itzá',ll:[-88.57,20.68],s:800,e:1450}
 ];
 
 /* -------- EVENTS -------- */
@@ -716,7 +767,11 @@ const EVENTS = [
 {y:1899,n:'Dagbon partitioned — Yendi to German Togoland',ll:[-0.01,9.44]},
 {y:1900,n:'Yaa Asantewaa\u2019s War of the Golden Stool',ll:[-1.62,6.7]},
 {y:1903,n:'Sokoto falls to Britain',ll:[5.24,13.06]},
-{y:1912,n:'Morocco — last of North Africa — made a protectorate',ll:[-6.5,32.3]}
+{y:1912,n:'Morocco — last of North Africa — made a protectorate',ll:[-6.5,32.3]},
+{y:1050,n:'Cahokia’s “big bang” — the great city rises on the Mississippi',ll:[-90.06,38.66]},
+{y:1142,n:'Great Law of Peace — Haudenosaunee Confederacy founded (eclipse dating)',ll:[-76.15,43.05]},
+{y:1680,n:'Pueblo Revolt — Spain expelled from New Mexico for twelve years',ll:[-106,35.7]},
+{y:1876,n:'Victory at the Greasy Grass (Little Bighorn)',ll:[-107.4,45.6]}
 ];
 
 /* -------- ERAS & ZOOM PRESETS -------- */
@@ -1216,14 +1271,11 @@ function setYear(y,fromSlider){
   const tick=$('#ticker');
   if(best){tick.textContent=best.y+' · '+best.n;tick.classList.toggle('fresh',YEAR-best.y<8)}
   update();
+  if(typeof syncHash==='function')syncHash();
 }
 function activeP(p){const a=p.s2||p.s;return YEAR>=a&&YEAR<=p.e}
 function update(){
-  POLITIES.forEach(p=>{
-    const on=activeP(p);
-    p._els.forEach(e=>e.classList.toggle('on',on));
-    p._on=on; syncLabel(p);
-  });
+  POLITIES.forEach(syncPolity);
   ROUTES.forEach(r=>{
     const on=YEAR>=r.s&&YEAR<=r.e, ghost=YEAR>r.e&&YEAR<=r.e+40;
     if(on&&!r._was&&r._len&&!reduceMotion){
@@ -1240,10 +1292,7 @@ function update(){
     if(r._albl)r._albl.classList.toggle('on',on&&VP.k>=0.9);
     r._was=on;
   });
-  CITIES.forEach(c=>{
-    const on=YEAR>=c.s&&YEAR<=c.e;
-    c._el.classList.toggle('on',on); c._on=on; syncLabel(c);
-  });
+  CITIES.forEach(syncCity);
   EVENTS.forEach(ev=>{
     if(!ev._el)return;
     const age=YEAR-ev.y;
@@ -1262,13 +1311,23 @@ function update(){
 const MW=3600,MH=1400;
 const VP={x:0,y:0,w:MW,h:MH,k:1};
 function applyVP(){
+  VP._px=VP.x;VP._py=VP.y;VP._pw=VP.w;VP._ph=VP.h;
   svg.setAttribute('viewBox',`${VP.x} ${VP.y} ${VP.w} ${VP.h}`);
   VP.k=MW/VP.w;
   // counter-scale labels
-  POLITIES.forEach(syncLabel); CITIES.forEach(syncLabel);
+  POLITIES.forEach(syncPolity); CITIES.forEach(syncCity);
   ROUTES.forEach(r=>{if(r._albl){r._albl.setAttribute('font-size',12/Math.sqrt(VP.k));r._albl.classList.toggle('on',r._was&&VP.k>=0.9)}});
   tordLbl.setAttribute('font-size',13/Math.sqrt(VP.k));
   document.querySelectorAll('#zoombar button').forEach((b,i)=>b.classList.toggle('act',i===VP.viewIdx));
+}
+function syncPolity(p){
+  const on=activeP(p)&&(!p.pz||VP.k>=p.pz);
+  p._els.forEach(e=>e.classList.toggle('on',on));
+  p._on=on; syncLabel(p);
+}
+function syncCity(c){
+  const on=YEAR>=c.s&&YEAR<=c.e&&(!c.cz||VP.k>=c.cz);
+  c._el.classList.toggle('on',on); c._on=on; syncLabel(c);
 }
 function syncLabel(o){
   if(!o._lbl)return;
@@ -1282,17 +1341,31 @@ function viewTo(b,idx){ // [lonMin,latMin,lonMax,latMax]
   const ar=MW/MH, br=w/h;
   if(br>ar){VP.w=w;VP.h=w/ar;VP.x=x;VP.y=y-(VP.h-h)/2}
   else{VP.h=h;VP.w=h*ar;VP.y=y;VP.x=x-(VP.w-w)/2}
-  VP.viewIdx=idx; applyVP();
+  VP.viewIdx=idx;
+  if(reduceMotion||!isFinite(VP._px)){snapVP();return}
+  const from={x:VP._px,y:VP._py,w:VP._pw,h:VP._ph},to={x:VP.x,y:VP.y,w:VP.w,h:VP.h};
+  cancelAnimationFrame(VP._anim);const t0=performance.now(),D=650;
+  const step=now=>{
+    let t=Math.min(1,(now-t0)/D);t=1-Math.pow(1-t,3);
+    VP.x=from.x+(to.x-from.x)*t;VP.y=from.y+(to.y-from.y)*t;
+    VP.w=from.w+(to.w-from.w)*t;VP.h=from.h+(to.h-from.h)*t;
+    applyVP();
+    if(t<1)VP._anim=requestAnimationFrame(step);else{Object.assign(VP,to);snapVP()}
+  };
+  VP._anim=requestAnimationFrame(step);
 }
+function snapVP(){applyVP()}
 const zb=$('#zoombar');
 VIEWS.forEach((v,i)=>{const b=document.createElement('button');b.textContent=v.n;
   b.onclick=()=>viewTo(v.b,i);zb.appendChild(b)});
+POLITIES.forEach(p=>{if(p.pz)return;const bb=bboxOf(p);
+  if((bb[2]-bb[0])*(bb[3]-bb[1])<8)p.pz=1.25});
 viewTo(VIEWS[0].b,0);
 
 /* pan + wheel + pinch */
 const wrap=$('#mapwrap');let drag=null,pinch=null;
 const ptrs=new Map();
-wrap.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,[e.clientX,e.clientY]);
+wrap.addEventListener('pointerdown',e=>{cancelAnimationFrame(VP._anim);ptrs.set(e.pointerId,[e.clientX,e.clientY]);
   if(ptrs.size===1){drag={x:e.clientX,y:e.clientY};wrap.classList.add('dragging')}
   else if(ptrs.size===2){drag=null;const p=[...ptrs.values()];pinch={d:Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]),w:VP.w,h:VP.h,cx:VP.x+VP.w/2,cy:VP.y+VP.h/2}}
   wrap.setPointerCapture(e.pointerId)});
@@ -1304,7 +1377,20 @@ wrap.addEventListener('pointermove',e=>{
     const f=Math.min(6,Math.max(0.5,pinch.d/d));VP.w=Math.min(MW*1.05,Math.max(150,pinch.w*f));VP.h=VP.w*MH/MW;
     VP.x=pinch.cx-VP.w/2;VP.y=pinch.cy-VP.h/2;VP.viewIdx=-1;applyVP()}
 });
-const endPtr=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;if(ptrs.size<1){drag=null;wrap.classList.remove('dragging')}};
+let dtT=0,dtP=null;
+const endPtr=e=>{
+  if(e.pointerType!=='mouse'&&ptrs.size===1&&!moved){
+    const now=performance.now();
+    if(now-dtT<320&&dtP&&Math.hypot(e.clientX-dtP[0],e.clientY-dtP[1])<44){
+      const r=wrap.getBoundingClientRect();
+      const mx=VP.x+(e.clientX-r.left)/r.width*VP.w, my=VP.y+(e.clientY-r.top)/r.height*VP.h;
+      const w=Math.max(150,VP.w/2.2);
+      const iLon=x=>x/PROJ.S+PROJ.LON_MIN, iLat=y=>PROJ.LAT_MAX-y/PROJ.S;
+      viewTo([iLon(mx-w/2),iLat(my+w*MH/MW/2),iLon(mx+w/2),iLat(my-w*MH/MW/2)],-1);
+      dtT=0;
+    } else {dtT=now;dtP=[e.clientX,e.clientY]}
+  }
+  ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;if(ptrs.size<1){drag=null;wrap.classList.remove('dragging')}};
 wrap.addEventListener('pointerup',endPtr);wrap.addEventListener('pointercancel',endPtr);
 wrap.addEventListener('wheel',e=>{e.preventDefault();
   const r=wrap.getBoundingClientRect();
@@ -1352,21 +1438,52 @@ function highlight(o,kind){
   hiEls.forEach(e=>e.classList.remove('hi'));hiEls=[];
   if(kind==='polity')o._els.forEach(e=>{e.classList.add('hi');hiEls.push(e)});
   if(kind==='route'){o._el.classList.add('hi');hiEls.push(o._el)}
+  if(o._lbl){o._lbl.classList.add('hi');hiEls.push(o._lbl)}
 }
+/* ---- geometry helpers ---- */
+function bboxPts(pts){let a=1e9,b=1e9,c=-1e9,d=-1e9;
+  pts.forEach(([lo,la])=>{a=Math.min(a,lo);b=Math.min(b,la);c=Math.max(c,lo);d=Math.max(d,la)});
+  return [a,b,c,d];}
+function bboxOf(p){let a=1e9,b=1e9,c=-1e9,d=-1e9;
+  (p.poly||[]).forEach(ring=>{const bb=bboxPts(ring);a=Math.min(a,bb[0]);b=Math.min(b,bb[1]);c=Math.max(c,bb[2]);d=Math.max(d,bb[3])});
+  return [a,b,c,d];}
+function flyToBox(bb){if(!isFinite(bb[0])||bb[0]>bb[2])return;const px=Math.max((bb[2]-bb[0])*.4,7),py=Math.max((bb[3]-bb[1])*.4,5);
+  viewTo([bb[0]-px,Math.max(-62,bb[1]-py),bb[2]+px,Math.min(78,bb[3]+py)],-1)}
+function flyTo(o,kind){flyToBox(kind==='route'?bboxPts(o.segs?o.segs.flat():(o.pts||[])):bboxOf(o))}
 function openDetail(o,kind){
   highlight(o,kind);
   const d=$('#detail');
   const catN=kind==='polity'?CAT[o.cat].n:RCAT[o.cat].n;
+  /* focus mode: dim the world, keep the subject and its connections lit */
+  svg.classList.add('focusing');
+  ROUTES.forEach(r=>r._el&&r._el.classList.remove('rel'));
+  let ctx='';
+  if(kind==='polity'){
+    const bb=bboxOf(o),m=3.5;
+    const rel=ROUTES.filter(r=>YEAR>=r.s&&YEAR<=r.e&&(r.segs?r.segs.flat():(r.pts||[])).some(([lo,la])=>lo>=bb[0]-m&&lo<=bb[2]+m&&la>=bb[1]-m&&la<=bb[3]+m));
+    rel.forEach(r=>r._el.classList.add('rel'));
+    const cx=(bb[0]+bb[2])/2, cy=(bb[1]+bb[3])/2;
+    const near=POLITIES.filter(q=>q!==o&&activeP(q))
+      .map(q=>{const b2=bboxOf(q);return [Math.hypot((b2[0]+b2[2])/2-cx,((b2[1]+b2[3])/2-cy)*1.3),q]})
+      .sort((x,y)=>x[0]-y[0]).slice(0,3).map(x=>x[1].n);
+    if(rel.length)ctx+=`<p class="ctx"><b>Connected by</b> · ${rel.map(r=>r.n).join(' · ')}</p>`;
+    if(near.length)ctx+=`<p class="ctx"><b>Neighbors in ${YEAR}</b> · ${near.join(' · ')}</p>`;
+  }
   d.innerHTML=`<button class="close" aria-label="Close">✕</button>
     <h2>${o.n}</h2>
     <div class="dyrs">${kind==='polity'?yrs(o):o.s+(o.e>o.s+5?' – '+(o.e>=1914?'1914 →':o.e):'')}${o.cap?' · '+o.cap:''}</div>
-    <p>${o.note}</p>
+    <p>${o.note}</p>${ctx}
     <div class="approx">${kind==='polity'?catN+' · extent approximate (peak)':catN}</div>`;
   d.classList.add('show');
   d.querySelector('.close').onclick=()=>closeDetail();
   if(innerWidth<=840)$('#panel').classList.add('open');
 }
-function closeDetail(){$('#detail').classList.remove('show');hiEls.forEach(e=>e.classList.remove('hi'));hiEls=[]}
+function closeDetail(){$('#detail').classList.remove('show');hiEls.forEach(e=>e.classList.remove('hi'));hiEls=[];
+  svg.classList.remove('focusing');ROUTES.forEach(r=>r._el&&r._el.classList.remove('rel'))}
+/* tap open water / land to release focus */
+svg.addEventListener('click',e=>{if(moved)return;
+  const c=e.target.classList;
+  if(e.target===svg||c.contains('land')||c.contains('grat')||c.contains('equator'))closeDetail()});
 
 /* ============================================================
    PANEL
@@ -1383,7 +1500,7 @@ function renderPanel(force){
   const body=$('#panelBody');
   let html='';
   GROUP_ORDER.forEach(cat=>{
-    const items=POLITIES.filter(p=>p.cat===cat&&(TAB==='all'||activeP(p)));
+    const items=POLITIES.filter(p=>p.cat===cat&&(TAB==='all'||activeP(p))&&(!SQ||p.n.toLowerCase().includes(SQ)));
     if(!items.length)return;
     html+=`<div class="grp"><h3>${CAT[cat].n}</h3>`;
     items.forEach(p=>{
@@ -1394,7 +1511,7 @@ function renderPanel(force){
     });
     html+='</div>';
   });
-  const rts=ROUTES.filter(r=>TAB==='all'||(YEAR>=r.s&&YEAR<=r.e));
+  const rts=ROUTES.filter(r=>(TAB==='all'||(YEAR>=r.s&&YEAR<=r.e))&&(!SQ||r.n.toLowerCase().includes(SQ)));
   if(rts.length){
     html+='<div class="grp"><h3>Routes & voyages</h3>';
     rts.forEach(r=>{const gone=TAB==='all'&&!(YEAR>=r.s&&YEAR<=r.e);
@@ -1404,18 +1521,38 @@ function renderPanel(force){
     html+='</div>';
   }
   if(TAB==='all'){
-    html+='<div class="grp"><h3>Chronicle of events</h3>';
-    EVENTS.forEach(ev=>{html+=`<div class="row${ev.y>YEAR?' gone':''}"><span class="yrs">${ev.y}</span><span class="nm" style="font-size:11px">${ev.n}</span></div>`});
-    html+='</div>';
+    const evs=EVENTS.filter(ev=>!SQ||ev.n.toLowerCase().includes(SQ));
+    if(evs.length){
+      html+='<div class="grp"><h3>Chronicle of events</h3>';
+      evs.forEach(ev=>{html+=`<div class="row evr${ev.y>YEAR?' gone':''}" data-y="${ev.y}" tabindex="0"><span class="yrs">${ev.y}</span><span class="nm" style="font-size:11px">${ev.n}</span></div>`});
+      html+='</div>';
+    }
   }
+  if(SQ&&!html)html='<div class="grp"><h3>No matches</h3></div>';
   body.innerHTML=html;
   body.querySelectorAll('.row[data-k]').forEach(r=>{
     const act=()=>{const k=r.dataset.k;
       const o=k==='polity'?POLITIES.find(p=>p.id===r.dataset.id):ROUTES.find(x=>x.id===r.dataset.id);
-      openDetail(o,k)};
+      if(k==='polity'&&!activeP(o))setYear(Math.min(1914,(o.s2||o.s)+1));
+      if(k==='route'&&!(YEAR>=o.s&&YEAR<=o.e))setYear(Math.min(1914,o.s+1));
+      openDetail(o,k);flyTo(o,k)};
     r.onclick=act; r.onkeydown=e=>{if(e.key==='Enter')act()};
   });
+  body.querySelectorAll('.row.evr').forEach(r=>{r.onclick=()=>setYear(+r.dataset.y)});
 }
+/* ---- search wiring ---- */
+let SQ='';
+const psInput=$('#psearch');
+psInput.addEventListener('input',()=>{
+  SQ=psInput.value.trim().toLowerCase();
+  if(SQ&&TAB!=='all'){TAB='all';
+    document.querySelectorAll('.ptabs button[data-tab]').forEach(x=>x.classList.toggle('act',x.dataset.tab==='all'))}
+  renderPanel(true);
+});
+psInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){const first=$('#panelBody').querySelector('.row[data-k]');if(first)first.click();psInput.blur()}
+  if(e.key==='Escape'){psInput.value='';SQ='';renderPanel(true)}
+});
 /* index: desktop collapse tab + mobile bottom sheet */
 const panelEl=$('#panel'), pToggle=$('#panelToggle'), sheetH=$('#sheetHandle');
 $('#panelHide').onclick=()=>{panelEl.classList.add('hidden');pToggle.classList.add('show')};
@@ -1473,6 +1610,11 @@ function step(t){
 }
 $('#play').onclick=togglePlay;
 
+/* deep links: #y=1325&v=7 */
+let hashT=null;
+function syncHash(){clearTimeout(hashT);hashT=setTimeout(()=>{
+  try{history.replaceState(null,'',`#y=${YEAR}${VP.viewIdx>=0?'&v='+VP.viewIdx:''}`)}catch(e){}},250)}
+
 /* frontispiece */
 (function(){
   const fr=document.getElementById('frontis');
@@ -1485,7 +1627,15 @@ $('#play').onclick=togglePlay;
   };
 })();
 
-setYear(800);
+(function(){
+  let y=800;
+  try{
+    const my=location.hash.match(/y=(\d{3,4})/), mv=location.hash.match(/v=(\d+)/);
+    if(mv&&VIEWS[+mv[1]])viewTo(VIEWS[+mv[1]].b,+mv[1]);
+    if(my)y=Math.min(1914,Math.max(800,+my[1]));
+  }catch(e){}
+  setYear(y);
+})();
 </script>
 </body>
 </html>
