@@ -296,7 +296,24 @@ svg.focusing .city.on{opacity:.3}
    Edit freely — this file is meant to be a living document.
    ============================================================ */
 
+/* ============================================================
+   ATLAS CHRONOLOGICUS — CODE MAP
+   Script 1 (this one): DATA
+     §1 PROJ + CAT/RCAT palettes
+     §2 POLITIES  (one object per polity; poly = [[lon,lat]...] rings)
+     §3 ROUTES    (pts or segs geometry) + TORDESILLAS
+     §4 CITIES · §5 EVENTS · §6 ERAS · §7 VIEWS (zoom presets)
+   Script 2: frontispiece + panel/sheet controls
+   Script 3: ENGINE
+     build layers → viewport/zoom (viewTo, applyVP, tween)
+     → pan/pinch/wheel/double-tap → tooltip + detail + FOCUS MODE
+     → panel + search → timeline/playback → §V5 ORIENTATION
+     → keyboard → deep links (#y=)
+   To add content: append to the matching DATA array below — the
+   engine derives everything else (LOD, focus, search) automatically.
+   ============================================================ */
 const PROJ = { LON_MIN:-180, LAT_MAX:78, S:10 };
+let SOUTH=false; /* §V5-A orientation flag — read by viewTo & interactions */
 const X = lon => (lon - PROJ.LON_MIN) * PROJ.S;
 const Y = lat => (PROJ.LAT_MAX - lat) * PROJ.S;
 
@@ -479,7 +496,7 @@ const POLITIES = [
 {id:'spain',n:'Spain (Castile & Aragon)',cat:'europe',s:1479,e:1914,cap:'Seville → Madrid',
  note:'United 1479; in a single generation took Granada, expelled its Jews, and stumbled onto two continents. American silver — above all Potosí — bankrolled its European wars.',
  poly:[[[-9,43.5],[-2,43.4],[3.2,42.4],[0.5,40],[-0.5,38],[-2.2,36.8],[-5.5,36.2],[-7,37.2],[-6.5,40],[-8.8,42]]],lbl:[-4,41],lz:1.4},
-{id:'england',n:'England → Great Britain',cat:'europe',s:800,e:1914,cap:'London',
+{id:'england',n:'England → Great Britain',cat:'europe',s:927,e:1914,cap:'London',
  note:'A late entrant to the Atlantic (Hawkins\u2019 slaving voyages, 1560s) that ended as its master; abolished the slave trade 1807 and used the Royal Navy to suppress it — while conquering much of the map.',
  poly:[[[-5.5,50],[0,51],[1.5,52.5],[0,54],[-2,55.5],[-4,57.5],[-6,56],[-4.5,53],[-5.8,51.5]]],lbl:[-2.5,53.5],lz:1.6},
 {id:'france',n:'Francia → France',cat:'europe',s:800,e:1914,cap:'Paris',
@@ -602,6 +619,11 @@ const POLITIES = [
 {id:'haida',n:'Haida (Xaayda Gwaay)',cat:'samerica',s:800,e:1914,cap:'(Haida Gwaii)',peoples:true,pz:1.15,
  note:'Sea power of the Northwest Coast: red-cedar canoes that raided and traded from Alaska to Puget Sound, an economy of salmon and potlatch, and the formline art tradition raised in monumental poles. Haida oral literature survives in its own voice — the narratives of Skaay and Ghandl of Skidegate, dictated in Haida in 1900, rank among the great epic poetry of the Americas. Smallpox in 1862 killed perhaps nine in ten; the nation endured.',
  poly:[[[-133.3,54.3],[-131.4,54.1],[-130.9,52],[-131.9,51.8],[-133.2,53]]],lbl:[-132.6,53.1],lz:1.6},
+
+/* ---- §V5-B Norman world ---- */
+{id:'normandy',n:'Duchy of Normandy',cat:'europe',s:911,e:1204,cap:'Rouen',pz:1.1,
+ note:'Born when Charles the Simple ceded the lower Seine to the Viking Rollo at Saint-Clair-sur-Épte (911) — Northmen become Normans within three generations. In 1066 Duke William crossed from Saint-Valery and broke the English shield-wall at Hastings; the conquest survives in the Bayeux Tapestry, a seventy-metre embroidered chronicle stitched within living memory of the battle, and in Domesday Book (1086), the conquest’s great audit of England. Absorbed by the French crown in 1204.',
+ poly:[[[-2.1,49.75],[1.4,50.1],[1.7,49.3],[0.4,48.55],[-1.6,48.5],[-2.2,49.2]]],lbl:[-0.3,49.2],lz:1.6},
 ];
 
 /* -------- ROUTES -------- */
@@ -682,6 +704,13 @@ const ROUTES = [
 {id:'r_qhapaq',n:'Qhapaq Ñan (Inca road)',cat:'caravan',s:1438,e:1533,
  note:'Some 40,000 km of engineered road knit Tawantinsuyu together — chasqui relay runners, suspension bridges, and tampu way-stations. The state\’s records rode with them as khipu, knotted-cord accounts kept by trained khipukamayuq.',
  pts:[[-78.5,-0.2],[-78.5,-7.2],[-72,-13.53],[-69,-16.5],[-70.6,-33.5]]},
+/* ---- §V5-B Norman routes ---- */
+{id:'r_hastings',n:'Norman conquest of England',cat:'explore',s:1066,e:1087,
+ note:'September 1066: some seven hundred ships from Saint-Valery-sur-Somme to Pevensey Bay. Harold’s army, force-marched south from its victory over the Norwegians at Stamford Bridge, broke at Hastings on 14 October. England’s ruling class was replaced almost entirely within a generation — an event so total that Domesday Book could inventory the result.',
+ pts:[[1.63,50.19],[0.33,50.82],[0.57,50.85]]},
+{id:'r_normansicily',n:'Normans to the Mezzogiorno',cat:'explore',s:1017,e:1091,dash:true,
+ note:'Norman knights arrived in southern Italy as pilgrim-mercenaries and stayed as conquerors: Robert Guiscard took Bari (1071), his brother Roger took Sicily from its emirs (1061–91). Their court at Palermo kept Arabic land registers and Greek scribes — and al-Idrisi drew the age’s finest world map there for Roger II, oriented south-up, as Arab cartographers preferred. Flip this atlas and you are seeing the world as Palermo drew it.',
+ pts:[[-0.3,49.2],[4.5,45.5],[9.2,43.6],[14.3,40.85],[16.87,41.13],[13.36,38.12]]},
 ];
 
 /* Tordesillas meridian, appears 1494, fades 1750 (Treaty of Madrid) */
@@ -771,7 +800,8 @@ const EVENTS = [
 {y:1050,n:'Cahokia’s “big bang” — the great city rises on the Mississippi',ll:[-90.06,38.66]},
 {y:1142,n:'Great Law of Peace — Haudenosaunee Confederacy founded (eclipse dating)',ll:[-76.15,43.05]},
 {y:1680,n:'Pueblo Revolt — Spain expelled from New Mexico for twelve years',ll:[-106,35.7]},
-{y:1876,n:'Victory at the Greasy Grass (Little Bighorn)',ll:[-107.4,45.6]}
+{y:1876,n:'Victory at the Greasy Grass (Little Bighorn)',ll:[-107.4,45.6]},
+{y:1066,n:'Hastings — the Norman conquest of England',ll:[0.57,50.85]}
 ];
 
 /* -------- ERAS & ZOOM PRESETS -------- */
@@ -798,6 +828,467 @@ const VIEWS = [
 {n:'Southern Africa',b:[10,-38,42,-8]},
 {n:'Mediterranean',b:[-14,27,40,47]}
 ];
+
+/* ============================================================
+   §V6 COMMUNITY EXPANSION — curated from a DeepSeek draft.
+   Dropped as duplicates of existing entries: Carolingian/France,
+   Wessex/England, Castile, Aragon, Poland, Lithuania, Tsardom of
+   Russia, Ancestral Puebloans (dup of chaco), Kingdom of Hawaiʻi,
+   Sultanate of Mogadishu (folded into Ajuran), Ly/Tran (covered by
+   Đại Việt), N./S. Silk Road (covered by The Silk Roads),
+   Honiara (founded 1940s), Cuzco (dup of Cusco).
+   ============================================================ */
+
+/* ---- §V6-A Europe & Caucasus ---- */
+POLITIES.push(
+{id:'hre',n:'Holy Roman Empire',cat:'europe',s:962,e:1806,cap:'(itinerant; Diet at Regensburg)',
+ note:'Otto I crowned 962; not a state but a legal universe — hundreds of kingdoms, duchies, bishoprics and free cities under an elected emperor. Voltaire’s quip that it was neither holy, Roman, nor an empire lands because it was something stranger: Europe’s longest-running constitutional order. Dissolved under Napoleonic pressure in 1806.',
+ poly:[[[6,47],[7,50.5],[10,53],[14,53.5],[18,50],[16,46.5],[10,45.5]]],lbl:[11.5,49.5],lz:1.3},
+{id:'scotland',n:'Kingdom of Scotland',cat:'europe',s:843,e:1707,cap:'Scone → Edinburgh',
+ note:'Unified under Kenneth MacAlpin (843). Survived centuries of English pressure — Bannockburn (1314), the Declaration of Arbroath (1320) — before entering the 1707 Union as a negotiated partner, keeping its own law and kirk.',
+ poly:[[[-5.5,55],[-6,56.7],[-5,58.5],[-3,58.6],[-2,57.5],[-2.8,55.8],[-4.5,55]]],lbl:[-4,57],lz:1.6},
+{id:'hungary',n:'Kingdom of Hungary',cat:'europe',s:1000,e:1526,cap:'Esztergom → Buda',
+ note:'Stephen I crowned 1000 with a crown sent by the pope; a major Central European power bridging Latin and Orthodox worlds. Shattered at Mohács (1526), after which the kingdom was partitioned between Ottoman and Habsburg rule.',
+ poly:[[[16,46],[18,48.5],[22,48.8],[26,47.5],[24,45.5],[19,45.5]]],lbl:[20,47],lz:1.4},
+{id:'bulgaria_1st',n:'First Bulgarian Empire',cat:'europe',s:800,e:1018,cap:'Pliska → Preslav → Ohrid',
+ note:'Byzantium’s great Balkan rival; adopted Christianity in 864, and its Preslav school gave the Slavic world the Cyrillic alphabet. Conquered by Basil II — “the Bulgar-Slayer” — in 1018.',
+ poly:[[[22,41],[23,43.8],[28,44],[29.5,42.8],[27,40.8],[24,40.3]]],lbl:[25.5,42.3],lz:1.5},
+{id:'bulgaria_2nd',n:'Second Bulgarian Empire',cat:'europe',s:1185,e:1396,cap:'Tarnovo',
+ note:'Restored by the Asen brothers’ revolt against Byzantium (1185); at its height under Ivan Asen II it dominated the Balkans. Fell to Ottoman conquest under Bayezid in 1396.',
+ poly:[[[22,41],[23,43.8],[28,44],[29.5,42.8],[27,40.8],[24,40.3]]],lbl:[25.5,42.3],lz:1.5},
+{id:'serbia_nemanjic',n:'Serbia (Nemanjić)',cat:'europe',s:1166,e:1371,cap:'Raška → Skopje',
+ note:'Rose under Stefan Nemanja; crowned an empire under Dušan the Mighty (1346), whose law code — the Dušanov zakonik — survives. The state fragmented after his death, on the road that led to Kosovo field (1389).',
+ poly:[[[19.5,42],[20.5,44],[22.5,43.5],[23.5,41.5],[21.5,41]]],lbl:[21.5,42.5],lz:1.5},
+{id:'georgia',n:'Kingdom of Georgia',cat:'europe',s:1008,e:1490,cap:'Tbilisi',
+ note:'A golden age under David the Builder and Queen Tamar (1184–1213), when Rustaveli wrote the national epic, The Knight in the Panther’s Skin. Broken by Mongol and Timurid invasions; fragmented by 1490.',
+ poly:[[[40.5,41],[42.5,43],[46.5,42],[46.5,40.5],[43,40.5]]],lbl:[43.5,41.7],lz:1.5},
+{id:'genoa',n:'Republic of Genoa',cat:'europe',s:1005,e:1797,cap:'Genoa',
+ note:'Venice’s great maritime rival: Corsica, Aegean colonies, and Black Sea ports like Caffa — through which, in 1347, the plague entered Europe aboard Genoese ships. Its bankers later financed the Spanish empire. Extinguished by Napoleon.',
+ poly:[[[7.6,44.4],[9.5,44.6],[9.9,44.1],[8.2,43.9]]],lbl:[8.8,44.9],lz:1.9},
+{id:'teutonic',n:'Teutonic Order State',cat:'europe',s:1230,e:1525,cap:'Marienburg (Malbork)',
+ note:'A crusading order turned Baltic state; conquered pagan Prussia and built Europe’s largest brick castle at Marienburg. Broken by Poland–Lithuania at Grunwald (1410); secularised into ducal Prussia in 1525.',
+ poly:[[[17.5,53.5],[19,54.8],[22.5,54.8],[22,53.2],[19,53]]],lbl:[20,54],lz:1.6}
+);
+
+/* ---- §V6-B Africa ---- */
+POLITIES.push(
+{id:'baguirmi',n:'Baguirmi Sultanate',cat:'sahel',s:1480,e:1897,cap:'Massenya',
+ note:'An Islamic sultanate on the Chari River south of Lake Chad; alternately rival and vassal of Kanem-Bornu and Wadai. Conquered by France in 1897.',
+ poly:[[[14.5,11],[17,12],[18,9.5],[15,9]]],lbl:[16,10.5],lz:1.8},
+{id:'wadai',n:'Wadai Empire',cat:'sahel',s:1635,e:1909,cap:'Abéché',
+ note:'A Central Sudanic power controlling trans-Saharan routes to Benghazi; fought Kanem-Bornu and Darfur for the middle belt. Among the last African states conquered by France (1909).',
+ poly:[[[19,12],[21,14.5],[23,13.5],[22,11],[19.5,10.5]]],lbl:[20.7,12.5],lz:1.8},
+{id:'kwararafa',n:'Kwararafa (Jukun)',cat:'sahel',s:1500,e:1850,cap:'Wukari region',
+ note:'A multi-ethnic confederacy on the Benue, led by the Jukun; in the 1600s its cavalry raided as far as Kano and Katsina, a counterweight to the Hausa city-states and Bornu.',
+ poly:[[[8.5,9.5],[10.5,10.5],[11,8.5],[9,8]]],lbl:[9.7,9.3],lz:1.9},
+{id:'nri',n:'Kingdom of Nri',cat:'forest',s:948,e:1911,cap:'Igbo-Ukwu region',
+ note:'Perhaps the oldest kingdom within Nigeria — and a state without an army: the Eze Nri’s ritual authority spread by priests, not soldiers, cleansing abominations and sanctioning markets across Igboland. The Igbo-Ukwu bronzes (9th c.) show its craft rivaled anything in the medieval world.',
+ poly:[[[6.5,6.5],[7.6,6.7],[7.7,5.6],[6.6,5.5]]],lbl:[7.1,6.1],lz:2},
+
+{id:'kuba',n:'Kuba Kingdom',cat:'central',s:1625,e:1900,cap:'Nsheng',
+ note:'A federation on the Kasai famous for raffia velvets, embroidered geometry, and ndop royal portrait figures — and for a court that kept meticulous dynastic oral records, king by king, which historians have cross-dated against a solar eclipse.',
+ poly:[[[20,-4.5],[22.5,-4.8],[22.5,-6.5],[20,-6.3]]],lbl:[21.2,-5.5],lz:1.8},
+{id:'ndebele_mthwakazi',n:'Ndebele Kingdom (Mthwakazi)',cat:'south',s:1838,e:1893,cap:'Bulawayo',
+ note:'Founded by Mzilikazi, who led his people a thousand miles north after breaking with Shaka; a disciplined regimental state on the Zimbabwean plateau. Destroyed by Rhodes’ British South Africa Company in the 1893 Matabele War.',
+ poly:[[[27,-18.5],[29.5,-19],[29.5,-21],[27,-20.5]]],lbl:[28.2,-19.7],lz:1.7},
+{id:'sakalava',n:'Sakalava Kingdoms',cat:'east',s:1650,e:1895,cap:'Menabe & Boina',
+ note:'Western Madagascar’s maritime dynasties, grown rich on the Mozambique Channel trade in cattle and slaves; checked by the rising Merina in the 1820s, annexed by France in 1895.',
+ poly:[[[43.5,-15.5],[45.5,-16.5],[45,-21],[43.8,-20]]],lbl:[44.5,-18],lz:1.6},
+{id:'zagwe',n:'Zagwe dynasty',cat:'east',s:900,e:1270,cap:'Roha (Lalibela)',
+ note:'Ethiopia between Aksum and the Solomonics — remembered above all for King Lalibela’s eleven churches hewn downward into living rock, a “New Jerusalem” built when the old one fell to Saladin. Replaced by the Solomonic dynasty in 1270.',
+ poly:[[[37.5,10.5],[39.5,13],[40.5,11.5],[38.5,9.5]]],lbl:[39,11.5],lz:1.7},
+{id:'ajuran',n:'Ajuran Sultanate',cat:'east',s:1300,e:1700,cap:'Mogadishu region',
+ note:'A Somali hydraulic state: the Ajuran taxed the wells and engineered limestone cisterns that made the Shabelle valley bloom, while the port of Mogadishu — minting its own coins since the 900s — anchored its Indian Ocean commerce. Ibn Battuta found the city’s cloth exported as far as Egypt.',
+ poly:[[[43.5,0],[45.5,3],[47,1.5],[45.5,-1.5]]],lbl:[45,1],lz:1.6}
+);
+
+/* ---- §V6-C Asia ---- */
+POLITIES.push(
+{id:'pandya',n:'Pandya dynasty',cat:'sasia',s:800,e:1345,cap:'Madurai',
+ note:'One of the three ancient Tamil crowned kingdoms; resurgent in the 1200s, when Marco Polo called its pearl-fishing coast the richest province in the world. Broken by Delhi’s raids in 1345.',
+ poly:[[[77,10],[79,10],[79.5,8.2],[77.3,8]]],lbl:[78.2,9.2],lz:1.6},
+{id:'hoysala',n:'Hoysala Empire',cat:'sasia',s:1026,e:1343,cap:'Dwarasamudra (Halebidu)',
+ note:'A Kannada dynasty whose temples at Belur and Halebidu carry stone carving to an almost jeweled density — soapstone friezes with every bangle articulated. Crushed between Delhi’s invasions and rising Vijayanagara.',
+ poly:[[[75,13.5],[77.5,13.8],[78,11.8],[75.5,11.5]]],lbl:[76.5,12.7],lz:1.6},
+{id:'ahom',n:'Ahom Kingdom',cat:'sasia',s:1228,e:1826,cap:'Charaideo → Sibsagar',
+ note:'A Tai dynasty that ruled Assam for six hundred years and kept its own chronicles — the buranjis, among South Asia’s richest indigenous historical records. Repelled seventeen Mughal invasions, most famously at Saraighat (1671); annexed by Britain in 1826.',
+ poly:[[[93,26],[95.5,27.3],[96,25.5],[93.5,25]]],lbl:[94.5,26.2],lz:1.7},
+{id:'sukothai',n:'Kingdom of Sukhothai',cat:'sasia',s:1238,e:1438,cap:'Sukhothai',
+ note:'The first major Tai kingdom, remembered as the cradle of Thai script and Theravada kingship; the Ramkhamhaeng inscription (1292) claims “in the water there are fish, in the fields there is rice.” Absorbed by Ayutthaya.',
+ poly:[[[99,17.5],[100.8,18],[100.5,16],[98.7,16]]],lbl:[99.7,17],lz:1.7},
+{id:'lanxang',n:'Lan Xang',cat:'sasia',s:1353,e:1707,cap:'Luang Prabang → Vientiane',
+ note:'“The kingdom of a million elephants” — the first unified Lao state, founded by Fa Ngum with Khmer backing; a Theravada buffer among Siam, Vietnam and Burma until it split into three successor kingdoms in 1707.',
+ poly:[[[101,19],[103,20.5],[105,18],[102.5,17]]],lbl:[102.8,19],lz:1.6},
+{id:'singhasari',n:'Singhasari',cat:'sasia',s:1222,e:1292,cap:'Singhasari',
+ note:'The east-Javanese kingdom that preceded Majapahit; its last king Kertanegara defied Kublai Khan’s envoys, and the Mongol fleet that came to punish him (1293) was outmaneuvered by his son-in-law — who used it to found Majapahit.',
+ poly:[[[111.5,-7.2],[114,-7.2],[114.2,-8.4],[111.8,-8.4]]],lbl:[113,-7.8],lz:1.7},
+{id:'ternate',n:'Sultanate of Ternate',cat:'sasia',s:1257,e:1914,cap:'Ternate',
+ note:'A volcanic speck that shook world trade: with Tidore it controlled the only clove groves on Earth. Sultan Baabullah expelled the Portuguese in 1575; the Dutch VOC later bent the sultanate into its spice monopoly.',
+ poly:[[[127.2,1.2],[127.6,1.2],[127.6,0.5],[127.2,0.5]]],lbl:[127.4,1.6],lz:1.9},
+{id:'sulu',n:'Sultanate of Sulu',cat:'sasia',s:1405,e:1915,cap:'Jolo',
+ note:'An Islamic maritime state spanning the Sulu and Celebes seas; its prahu fleets dominated regional trade and raiding for centuries. Outlasted Spain’s empire in the Philippines; sovereignty ceded under the US in 1915.',
+ poly:[[[120.8,6.3],[121.8,6.5],[122,5.5],[120.9,5.5]]],lbl:[121.4,6.9],lz:1.8},
+{id:'westernxia',n:'Western Xia (Tangut)',cat:'easia',s:1038,e:1227,cap:'Xingqing (Yinchuan)',
+ note:'A Tangut Buddhist empire astride the Gansu corridor of the Silk Road, with its own invented script of six thousand characters. Genghis Khan died on campaign against it; the Mongols’ revenge (1227) was near-total erasure.',
+ poly:[[[100,37],[104,39.5],[107.5,38],[105,35.5],[101,35.5]]],lbl:[103.5,37.5],lz:1.4},
+{id:'dali',n:'Kingdom of Dali',cat:'easia',s:937,e:1253,cap:'Dali',
+ note:'A Buddhist kingdom of the Bai people in Yunnan, heir to Nanzhao; a hinge between China, Tibet and Southeast Asia on the Tea Horse Road. Taken by Kublai’s flanking campaign of 1253.',
+ poly:[[[99,26],[102,26.5],[103,24.5],[100,23.5]]],lbl:[100.8,25.3],lz:1.5},
+{id:'karakhitai',n:'Kara-Khitai (Western Liao)',cat:'steppe',s:1124,e:1218,cap:'Balasagun',
+ note:'Founded by Khitan refugees fleeing the Jurchen conquest of Liao China — a Chinese-style chancery ruling Muslim Central Asia. Its defeat of the Seljuks at Qatwan (1141) may have seeded Europe’s legend of Prester John. Fell to Genghis in 1218.',
+ poly:[[[68,41],[74,44],[80,43],[76,39],[70,38.5]]],lbl:[74,41.5],lz:1.4},
+{id:'khwarezm',n:'Khwarezmian Empire',cat:'steppe',s:1077,e:1231,cap:'Urgench → Samarkand',
+ note:'A Turkic-Persianate empire that briefly ruled from the Caspian to the Indus — until the Shah executed Genghis Khan’s trade envoys in 1218. The Mongol response destroyed Urgench, Merv and Nishapur; few states have paid more for one decision.',
+ poly:[[[52,42],[58,43.5],[65,41],[68,37],[60,34],[54,37]]],lbl:[59,39.5],lz:1.4},
+{id:'ghaznavid',n:'Ghaznavid Empire',cat:'sasia',s:977,e:1186,cap:'Ghazni',
+ note:'Turkic slave-soldiers turned imperial dynasty; Mahmud’s seventeen Indian campaigns made Ghazni glitter, and his court hosted Firdausi’s Shahnameh and al-Biruni’s great study of India. Displaced by the Ghurids.',
+ poly:[[[62,34.5],[68,36],[72,33],[66,30.5]]],lbl:[66.5,33.5],lz:1.4},
+{id:'gurid',n:'Ghurid Empire',cat:'sasia',s:1148,e:1215,cap:'Firuzkuh',
+ note:'From the mountain fastness of central Afghanistan; Muhammad of Ghor’s victories at Tarain (1192) opened north India, and his slave-general Qutb al-Din Aibak founded the Delhi Sultanate. The Minaret of Jam still stands in their ruined capital’s valley.',
+ poly:[[[62.5,34.5],[66.5,35.5],[68,32.5],[64,31.5]]],lbl:[65,33.5],lz:1.6},
+{id:'samanid',n:'Samanid Empire',cat:'steppe',s:819,e:999,cap:'Bukhara',
+ note:'The Persian renaissance: the first native Iranian dynasty after the Arab conquest, whose Bukhara court revived Persian as a literary language — Rudaki sang here, and Ibn Sina was educated in its libraries. Its Turkic slave-soldiers inherited the state.',
+ poly:[[[60,37],[66,40],[70,38.5],[66,35],[61,35]]],lbl:[64.5,37.5],lz:1.4},
+{id:'buyid',n:'Buyid dynasty',cat:'nafrica',s:934,e:1062,cap:'Shiraz & Baghdad',
+ note:'Daylamite soldiers from the Caspian mountains who took Baghdad in 945 and ruled as Shi’a protectors of the Sunni caliph — the caliphate’s power made openly ceremonial. Displaced by the Seljuks.',
+ poly:[[[44,33],[50,34.5],[54,30],[47,28.5]]],lbl:[49,31.5],lz:1.4},
+{id:'zand',n:'Zand dynasty',cat:'nafrica',s:1751,e:1794,cap:'Shiraz',
+ note:'Karim Khan refused the title of shah, ruling as “advocate of the people” (vakil al-ra’aya) from a rebuilt Shiraz — a rare interlude of peace and building in Iran’s violent century. The dynasty fell to the Qajars within a decade of his death.',
+ poly:[[[47,32],[53,32],[54,28.5],[48,28.5]]],lbl:[50.5,30.3],lz:1.5},
+{id:'afsharid',n:'Afsharid dynasty',cat:'nafrica',s:1736,e:1796,cap:'Mashhad',
+ note:'Nader Shah — “the Napoleon of Persia” — rebuilt Iran’s armies, sacked Delhi in 1739, and carried off the Peacock Throne and the Koh-i-Noor. His empire barely outlived his assassination (1747), holding on in Khorasan until 1796.',
+ poly:[[[54,37],[60,38],[62,34],[56,33]]],lbl:[58,35.5],lz:1.5}
+);
+
+/* ---- §V6-D Americas & Oceania ---- */
+POLITIES.push(
+{id:'toltec',n:'Toltec state',cat:'samerica',s:950,e:1150,cap:'Tula (Tollan)',
+ note:'The power of central Mexico between Teotihuacan and the Aztecs, remembered by the Aztecs themselves as the archetype of civilisation — toltēcatl came to mean “master artisan.” Tula’s basalt warrior columns still stand.',
+ poly:[[[-100.5,20.5],[-98.5,20.8],[-98.5,19.3],[-100.5,19.3]]],lbl:[-99.5,20],lz:1.5},
+{id:'zapotec',n:'Zapotec kingdoms',cat:'samerica',s:800,e:1521,cap:'Monte Albán → Zaachila',
+ note:'Heirs of one of Mesoamerica’s oldest urban and literate traditions — Monte Albán’s hieroglyphs are among the earliest writing in the Americas. The valley city-states resisted the Aztecs and then the Spanish from mountain strongholds.',
+ poly:[[[-97.5,17.3],[-95.5,17.3],[-95.8,16],[-97.8,16.2]]],lbl:[-96.6,16.8],lz:1.5},
+{id:'mixtec',n:'Mixtec kingdoms',cat:'samerica',s:1000,e:1521,cap:'Tilantongo · Tututepec',
+ note:'City-states of the Ñuu Dzahui, “people of the rain” — whose painted deerskin codices survive as some of the Americas’ few pre-conquest books, chronicling dynasties like the conqueror 8 Deer Jaguar Claw. Their goldwork was the finest in Mesoamerica.',
+ poly:[[[-98.5,17.8],[-97,17.8],[-97.3,16.2],[-98.8,16.5]]],lbl:[-97.8,17.2],lz:1.6},
+{id:'tairona',n:'Tairona chiefdoms',cat:'samerica',s:1000,e:1600,cap:'Teyuna (Ciudad Perdida)',
+ note:'Stone-terraced towns in the Sierra Nevada de Santa Marta, linked by paved paths — Teyuna, the “Lost City,” predates Machu Picchu by centuries. Their goldsmithing awed the Spanish; their descendants, the Kogi, still guard the mountain.',
+ poly:[[[-74.3,11.3],[-73.3,11.5],[-73.2,10.6],[-74.2,10.5]]],lbl:[-73.7,11],lz:1.8},
+{id:'apache',n:'Apache peoples (Ndé)',cat:'samerica',s:1500,e:1886,cap:'(decentralised bands)',peoples:true,
+ note:'Athabaskan-speaking bands of the Southwest borderlands who held off Spain, Mexico and the United States for three centuries of raid and treaty; Geronimo’s surrender in 1886 closed the longest resistance in North American history.',
+ poly:[[[-110,34.5],[-105.5,35],[-104.5,32],[-109,31.5]]],lbl:[-107,33.5],lz:1.4},
+{id:'guarani',n:'Guaraní peoples',cat:'samerica',s:800,e:1914,cap:'(decentralised)',peoples:true,
+ note:'Tupi–Guaraní speakers of the Paraná basin; their language absorbed the Jesuit mission era and outlived it — today Guaraní is a co-official national language of Paraguay, the only Indigenous tongue in the Americas with that standing.',
+ poly:[[[-58.5,-24],[-54.5,-23.5],[-54,-26.5],[-57.5,-27]]],lbl:[-56.2,-25.2],lz:1.5},
+{id:'tlingit',n:'Tlingit (Lingít)',cat:'samerica',s:800,e:1914,cap:'(Southeast Alaska)',peoples:true,
+ note:'Masters of the Alaskan panhandle’s fjords: clan houses, crest poles, and Chilkat weaving encoding lineage law. In 1802 they destroyed the Russian fort at Sitka and met its reconquest in armor — the Russians never fully controlled the coast.',
+ poly:[[[-136.5,57.5],[-133,58.5],[-131.5,56],[-134.5,55.5]]],lbl:[-134.5,57],lz:1.5},
+{id:'tonga_empire',n:'Tu’i Tonga Empire',cat:'samerica',s:950,e:1865,cap:'Mu’a',
+ note:'A maritime chiefdom whose tribute network — borne by double-hulled kalia canoes — reached Fiji, Samoa and beyond; the langi royal tombs and the Ha’amonga trilithon remain. The line of the Tu’i Tonga ended in 1865, but the monarchy of Tonga descends from it: the one Pacific kingdom never colonised.',
+ poly:[[[-176,-20.5],[-174.5,-20.8],[-174.7,-22],[-176.2,-21.7]]],lbl:[-175.3,-19.8],lz:1.4},
+{id:'rapa_nui',n:'Rapa Nui',cat:'samerica',s:800,e:1888,cap:'Orongo (ritual centre)',
+ note:'The most isolated inhabited place on Earth, settled by Polynesian voyagers who raised nearly a thousand moai and produced rongorongo — a script still undeciphered. The old story of self-inflicted “ecocide” is propaganda worth dispelling: the society adapted to its deforested island and was destroyed from outside, by Peruvian slave raids (1862–63) and introduced disease. Chile annexed the island in 1888.',
+ poly:[[[-109.45,-27.05],[-109.2,-27.05],[-109.2,-27.2],[-109.45,-27.2]]],lbl:[-109.3,-26.6],lz:1.6}
+);
+
+/* ---- §V6-E Routes ---- */
+ROUTES.push(
+{id:'r_varangian',n:'Varangian river roads',cat:'explore',s:800,e:1100,
+ note:'Norse traders and warlords rowed and portaged two great river systems: down the Dnieper — “from the Varangians to the Greeks” — to Constantinople, and down the Volga to the Caspian and the silver of the Islamic world. Along these roads the Rus polity itself took shape.',
+ segs:[[[24.9,59.4],[31.28,58.52],[30.52,50.45],[30.3,46.5],[29,41.2]],
+       [[31.28,58.52],[38.5,55.5],[44.5,48.8],[48.03,46.35]]]},
+{id:'r_crusade',n:'Crusader road (via Constantinople)',cat:'explore',s:1096,e:1291,
+ note:'The overland pilgrimage-in-arms: down the Danube, across the Bosporus at Constantinople, and through Anatolia’s ambush country to Antioch and Jerusalem. Two centuries of Latin kingdoms in the Levant ended at Acre in 1291.',
+ pts:[[4.8,49.5],[10,48],[16,46],[20.5,44.8],[26,43],[29,41.2],[32.5,39.5],[36.2,36.2],[35.5,33.9],[35.23,31.77]]},
+{id:'r_spice',n:'Molucca–Malacca spice run',cat:'monsoon',s:1400,e:1600,
+ note:'Cloves from Ternate and Tidore, nutmeg from Banda — island monopolies carried through the Java Sea to Malacca, the emporium where, as Tomé Pires wrote, “whoever is lord of Malacca has his hand on the throat of Venice.”',
+ pts:[[127.4,0.8],[122,2],[117,3.5],[112,3],[107,1.5],[103.5,2],[102.2,2.2]]},
+{id:'r_capecairo',n:'Cape to Cairo (Rhodes’ railway dream)',cat:'steam',s:1880,e:1914,dash:true,
+ note:'Cecil Rhodes’ imperial fantasy: an unbroken British corridor of rail and telegraph from Cape Town to Cairo. The telegraph made it; the railway never did — German East Africa and the Sudd swamps stood in the way. The dream’s map, Rhodes bestriding the continent, became the very image of the Scramble.',
+ pts:[[18.4,-33.9],[24.7,-28.7],[28.5,-20.1],[25.8,-17.9],[29.6,-11.5],[32.7,-2.5],[32.5,15.6],[32.9,24.1],[31.24,30.05]]},
+{id:'r_orient',n:'Orient Express',cat:'steam',s:1883,e:1914,dash:true,
+ note:'Paris to Constantinople in eighty hours: the Belle Époque on rails — sleeping cars, spies, and kings — stitching Western Europe to the Ottoman capital just as the age it symbolised prepared to destroy itself.',
+ pts:[[2.35,48.85],[8.5,48.5],[13.4,48.2],[16.37,48.21],[19.04,47.5],[20.5,44.8],[26,43],[28.98,41.02]]}
+);
+
+/* ---- §V6-F Cities ---- */
+CITIES.push(
+{n:'Aachen',ll:[6.08,50.78],s:800,e:1914},
+{n:'Córdoba',ll:[-4.78,37.88],s:800,e:1914,star:true},
+{n:'Kyiv',ll:[30.52,50.45],s:882,e:1914},
+{n:'Novgorod',ll:[31.28,58.52],s:800,e:1914},
+{n:'Vienna',ll:[16.37,48.21],s:1155,e:1914},
+{n:'Prague',ll:[14.43,50.08],s:885,e:1914},
+{n:'Buda',ll:[19.04,47.5],s:1000,e:1914,cz:1.2},
+{n:'Kraków',ll:[19.94,50.06],s:966,e:1914,cz:1.2},
+{n:'Jerusalem',ll:[35.23,31.77],s:800,e:1914,star:true},
+{n:'Aleppo',ll:[37.16,36.2],s:800,e:1914},
+{n:'Isfahan',ll:[51.68,32.65],s:800,e:1914},
+{n:'Bukhara',ll:[64.42,39.77],s:800,e:1914},
+{n:'Tashkent',ll:[69.24,41.3],s:800,e:1914,cz:1.3},
+{n:'Luoyang',ll:[112.45,34.62],s:800,e:1914,cz:1.2},
+{n:'Nanjing',ll:[118.78,32.06],s:800,e:1914},
+{n:'Osaka',ll:[135.5,34.69],s:800,e:1914,cz:1.2},
+{n:'Huế',ll:[107.59,16.47],s:1600,e:1914,cz:1.3},
+{n:'Mogadishu',ll:[45.34,2.04],s:900,e:1914},
+{n:'Monte Albán',ll:[-96.72,17.04],s:800,e:1400},
+{n:'Tula',ll:[-99.34,20.05],s:950,e:1150}
+);
+
+
+/* ============================================================
+   §V7 COMMUNITY EXPANSION, WAVE 2 — curated from a DeepSeek draft.
+   Dropped as duplicates: Dnieper route (= Varangian river roads),
+   Sahara iron–salt road (= trans-Saharan roads), East Indies route
+   (= da Gama + Brouwer), Prague/Vienna/Budapest cities (added V6),
+   Kordofan (dubious), 13 events already in the chronicle, and a
+   732 event predating the atlas. Fixed: Bavaria & Sardinia dates,
+   Amber Road & Polynesian geometry, Maguindanao’s annexation,
+   England’s start (927, Æthelstan — was 800).
+   ============================================================ */
+
+/* ---- §V7-A Europe ---- */
+POLITIES.push(
+{id:'mercia',n:'Kingdom of Mercia',cat:'europe',s:800,e:918,cap:'Tamworth',
+ note:'The midland power of the Anglo-Saxon heptarchy; under Offa (r. 757–796) it built the great dyke against the Welsh and minted coins fine enough to circulate abroad. Ground down by the Viking Great Army, its remnant absorbed by Wessex — whose lady Æthelflæd, ruler of the Mercians, led its reconquest.',
+ poly:[[[-3,52.5],[-0.5,53.2],[0.2,52.8],[-1,51.5],[-2.5,51.8]]],lbl:[-1.7,52.4],lz:1.7},
+{id:'northumbria',n:'Kingdom of Northumbria',cat:'europe',s:800,e:927,cap:'York (Eoforwic → Jórvík)',
+ note:'The northern Anglo-Saxon kingdom whose monasteries made it a lighthouse of early medieval learning — Bede wrote history at Jarrow, the Lindisfarne Gospels were painted here, and the 793 raid on Lindisfarne opened the Viking Age. York became Norse Jórvík before Wessex absorbed the kingdom in 927.',
+ poly:[[[-2.5,53.5],[-0.5,54.5],[0.5,55.5],[-1.5,56],[-3,55.5],[-4,54.5]]],lbl:[-1.8,54.8],lz:1.7},
+{id:'bohemia',n:'Kingdom of Bohemia',cat:'europe',s:1198,e:1914,cap:'Prague',
+ note:'The one kingdom inside the Holy Roman Empire; under Charles IV Prague became the imperial capital and got Central Europe’s first university (1348). The Hussite revolution (1419–36) defied crusade after crusade a century before Luther; the Defenestration of Prague (1618) lit the Thirty Years’ War.',
+ poly:[[[12,49],[13,51],[15.5,51],[17,50],[16.5,48.5],[14.5,48.5]]],lbl:[14.5,50],lz:1.5},
+{id:'bavaria',n:'Bavaria (duchy → electorate)',cat:'europe',s:800,e:1806,cap:'Regensburg → Munich',
+ note:'One of the old stem duchies of the German lands, ruled by the Wittelsbachs for over seven centuries; elevated to an electorate in 1623 during the Thirty Years’ War, and raised to a kingdom by Napoleon in 1806.',
+ poly:[[[10,47],[11.5,49],[14,49],[13,47.5],[11.5,47]]],lbl:[12.3,48],lz:1.6},
+{id:'swiss_confed',n:'Old Swiss Confederacy',cat:'europe',s:1291,e:1848,cap:'(cantonal diets)',
+ note:'Mountain valley communes sworn against Habsburg lordship in the Eternal Alliance of 1291; their pike squares destroyed feudal cavalry at Morgarten and Sempach and made “Swiss” a byword for infantry. De facto independent from 1499, recognised at Westphalia in 1648, a federal state from 1848.',
+ poly:[[[6.1,46.2],[7,47.4],[9.5,47.5],[10,46.5],[8,45.9]]],lbl:[8,46.7],lz:1.5},
+{id:'papal_states',n:'Papal States',cat:'europe',s:800,e:1870,cap:'Rome',
+ note:'The pope as temporal prince across central Italy — a state whose sovereign claimed authority over every other. It crowned emperors, launched crusades, and bankrolled the Renaissance; Italian unification extinguished it in 1870, leaving the “prisoner of the Vatican.”',
+ poly:[[[11,42.5],[12,43.8],[13.8,43.7],[14.5,42],[13.5,41.2],[12,41.4]]],lbl:[12.8,42.5],lz:1.5},
+{id:'florence',n:'Republic of Florence',cat:'europe',s:1115,e:1569,cap:'Florence',
+ note:'Bankers to Europe and cradle of the Renaissance: the florin was the continent’s dollar, and under Medici patronage the city produced Dante, Brunelleschi’s dome, Botticelli, Leonardo, Michelangelo and Machiavelli — who wrote The Prince after the republic he served fell. Became the Grand Duchy of Tuscany in 1569.',
+ poly:[[[10.5,43.5],[11.5,44.1],[12.1,43.5],[11.4,43]]],lbl:[11.3,44.4],lz:1.9},
+{id:'navarre',n:'Kingdom of Navarre',cat:'europe',s:824,e:1620,cap:'Pamplona',
+ note:'The Basque kingdom of the western Pyrenees, buffer between France and the Spanish crowns; its southern half was annexed by Castile in 1512, and its northern remnant gave France a king — Henry IV, “Paris is worth a mass” — before merging with the French crown.',
+ poly:[[[-2.2,43.3],[-0.8,43.4],[0.3,42.9],[-0.5,42.2],[-2,42.3]]],lbl:[-1,42.9],lz:1.7},
+{id:'sardinia',n:'Kingdom of Sardinia (Savoy–Piedmont)',cat:'europe',s:1720,e:1861,cap:'Turin',
+ note:'The Savoyard state that traded Sicily for Sardinia in 1720 and became the engine of Italian unification: Cavour’s diplomacy and Garibaldi’s thousand delivered the peninsula, and its king Victor Emmanuel II was proclaimed King of Italy in 1861.',
+ poly:[[[7,44],[8.5,45.5],[9.5,45],[8.5,44]]],lbl:[8,45.2],lz:1.7},
+{id:'livonian_order',n:'Livonian Order',cat:'europe',s:1237,e:1561,cap:'Wenden (Cēsis)',
+ note:'The Baltic crusading order ruling much of Latvia and Estonia — the northern twin of the Teutonic state. Alexander Nevsky checked its eastward push on the ice of Lake Peipus (1242); Ivan the Terrible’s Livonian War finally shattered it.',
+ poly:[[[23,57],[25,58.3],[27.5,57.5],[26,56],[24,56.2]]],lbl:[25,57.3],lz:1.5},
+{id:'crimean_khanate',n:'Crimean Khanate',cat:'steppe',s:1441,e:1783,cap:'Bakhchisarai',
+ note:'The longest-lived successor of the Golden Horde, under Ottoman protection from 1475; its cavalry burned Moscow in 1571, and the slave markets of Caffa consumed perhaps two million captives from the East European steppe — the “harvesting” that shaped Cossack and Russian frontier society. Annexed by Catherine the Great in 1783.',
+ poly:[[[33,45],[34.5,46.2],[36.5,46],[36.3,44.5],[33.7,44.4]]],lbl:[34.8,45.4],lz:1.4}
+);
+
+/* ---- §V7-B Crusader states & Caucasus ---- */
+POLITIES.push(
+{id:'jerusalem_kingdom',n:'Kingdom of Jerusalem',cat:'nafrica',s:1099,e:1291,cap:'Jerusalem → Acre',
+ note:'The chief Crusader state, carved out in 1099 amid massacre; a Frankish colonial kingdom that lasted two centuries on the Levantine coast. Hattin (1187) cost it Jerusalem to Saladin; the fall of Acre in 1291 ended the Latin East.',
+ poly:[[[34.8,33],[36.3,33.3],[36,31.3],[34.9,31.4]]],lbl:[35.5,32.4],lz:1.5},
+{id:'antioch_principate',n:'Principality of Antioch',cat:'nafrica',s:1098,e:1268,cap:'Antioch',
+ note:'The Norman-founded northern Crusader state — Bohemond kept for himself the city the First Crusade nearly starved before. Baibars’ sack of 1268 was so total that Antioch, one of antiquity’s great cities, never recovered.',
+ poly:[[[35.8,36.6],[36.8,36.6],[36.6,35.2],[35.7,35.5]]],lbl:[36.2,36.1],lz:1.6},
+{id:'edessa_county',n:'County of Edessa',cat:'nafrica',s:1098,e:1144,cap:'Edessa (Urfa)',
+ note:'The first Crusader state founded and the first to fall: Zengi’s capture of Edessa in 1144 shocked Latin Europe into the Second Crusade — which failed, and made Zengi’s house, and then Saladin, the counter-crusade’s standard-bearers.',
+ poly:[[[37.5,37.3],[39.2,37.5],[39,36.4],[37.6,36.5]]],lbl:[38.3,37],lz:1.6},
+{id:'tripoli_county',n:'County of Tripoli',cat:'nafrica',s:1102,e:1289,cap:'Tripoli (Lebanon)',
+ note:'The Toulousain Crusader county on the Lebanese coast, shielded by the great fortress of Krak des Chevaliers — which T. E. Lawrence called the finest castle in the world. Fell to the Mamluk sultan Qalawun in 1289.',
+ poly:[[[35.4,34.7],[36.4,34.9],[36.2,33.9],[35.2,34.1]]],lbl:[35.9,34.4],lz:1.6},
+{id:'cilician_armenia',n:'Cilician Armenia',cat:'nafrica',s:1080,e:1375,cap:'Sis',
+ note:'Armenia reborn in exile: refugees from the Seljuk conquest built a new kingdom in the Taurus mountains, allied by marriage and trade with the Crusader states and the Mongols. The last king died a pensioner in Paris after the Mamluk conquest of 1375.',
+ poly:[[[34.5,37],[36,37.6],[36.5,36.6],[35,36.3]]],lbl:[35.4,37.3],lz:1.5},
+{id:'shirvanshah',n:'Shirvanshahs',cat:'nafrica',s:861,e:1538,cap:'Shamakhi → Baku',
+ note:'One of Islam’s longest-lived dynasties — nearly seven centuries on the western Caspian shore, surviving Seljuks, Mongols and Timur by pliant diplomacy. Their palace complex in Baku still crowns the old city. Extinguished by the Safavids.',
+ poly:[[[47.5,40],[49,41.2],[50,40.4],[49,39.5]]],lbl:[48.8,40.9],lz:1.6},
+{id:'circassia',n:'Circassia (Adyghe confederation)',cat:'europe',s:1450,e:1864,cap:'(tribal councils)',peoples:true,
+ note:'The Adyghe peoples of the northwest Caucasus, unconquered for centuries between the Ottoman and Russian worlds. Russia’s hundred-year Caucasian War ended in 1864 with conquest and the expulsion of most of the nation to Ottoman lands — an ethnic cleansing whose diaspora spans the Middle East today.',
+ poly:[[[37,44.3],[39.5,45],[40.5,43.8],[38.5,43.2]]],lbl:[38.7,44.3],lz:1.4}
+);
+
+/* ---- §V7-C South & Southeast Asia ---- */
+POLITIES.push(
+{id:'gahadavala',n:'Gahadavala dynasty',cat:'sasia',s:1090,e:1194,cap:'Varanasi',
+ note:'Rajput lords of the middle Ganges, ruling from holy Varanasi; their king Jayachandra fell to Muhammad of Ghor at Chandawar (1194), opening the Gangetic plain to the Delhi Sultanate.',
+ poly:[[[81.5,26],[83,27.8],[85,27],[84,25.2]]],lbl:[83.3,26.5],lz:1.5},
+{id:'mysore',n:'Kingdom of Mysore',cat:'sasia',s:1399,e:1914,cap:'Mysore → Srirangapatna',
+ note:'A Wodeyar kingdom seized in the 1760s by Hyder Ali and his son Tipu Sultan, who fought Britain through four Anglo-Mysore wars with rocket artillery Europe copied. Tipu died sword in hand at Srirangapatna (1799); the restored Wodeyars ruled on as a princely state.',
+ poly:[[[75.5,13.5],[77.5,13.5],[78,11.5],[75.8,11.5]]],lbl:[76.7,12.5],lz:1.6},
+{id:'nepal_kingdom',n:'Kingdom of Nepal (Gorkha)',cat:'sasia',s:1768,e:1914,cap:'Kathmandu',
+ note:'Prithvi Narayan Shah’s Gorkha conquest unified the valley kingdoms in 1768. The Anglo-Nepalese War (1814–16) cost territory but not sovereignty — and so impressed the British that they began recruiting the Gurkha regiments. Never colonised.',
+ poly:[[[82.5,28.5],[84,30],[86.5,29],[85,27.3]]],lbl:[84.5,29],lz:1.5},
+{id:'bhutan',n:'Kingdom of Bhutan',cat:'sasia',s:1650,e:1914,cap:'Punakha → Thimphu',
+ note:'Unified by the Zhabdrung Ngawang Namgyal, the lama-king whose dual system of religious and civil rule shaped the state; the dzong fortresses he built still govern the valleys. The 1910 treaty with British India preserved internal autonomy.',
+ poly:[[[89,27.6],[90,28.4],[91.5,28],[90.3,26.9]]],lbl:[90.2,28.1],lz:1.7},
+{id:'lanna',n:'Lan Na (Chiang Mai)',cat:'sasia',s:1292,e:1775,cap:'Chiang Mai',
+ note:'“The kingdom of a million rice fields,” founded by King Mangrai; a northern Thai power and Buddhist scholarly centre that spent two centuries under Burmese overlordship before Siam absorbed it in 1775.',
+ poly:[[[98,20],[100,21],[101,19],[99,18.5]]],lbl:[99.5,20],lz:1.6},
+{id:'ava',n:'Kingdom of Ava',cat:'sasia',s:1364,e:1555,cap:'Ava (Inwa)',
+ note:'The Burman heartland state after Pagan’s fall, locked in the Forty Years’ War with Mon Hanthawaddy; its fall to Toungoo in 1555 cleared the way for Burma’s reunification.',
+ poly:[[[95,21],[96,22.7],[97.2,21.7],[96.2,20]]],lbl:[96,21.7],lz:1.6},
+{id:'hanthawaddy',n:'Hanthawaddy (Pegu)',cat:'sasia',s:1287,e:1552,cap:'Pegu (Bago)',
+ note:'The Mon kingdom of Lower Burma, grown rich on Indian Ocean trade through its delta ports; under Queen Shin Sawbu and King Dhammazedi it was a famed centre of Theravada reform. Conquered by Toungoo in 1552.',
+ poly:[[[95.8,16],[96.8,18],[98,17],[97,15.3]]],lbl:[96.8,17],lz:1.6},
+{id:'brunei_empire',n:'Bruneian Empire',cat:'sasia',s:1368,e:1888,cap:'Kota Batu',
+ note:'A thalassocracy that once claimed coastal Borneo and reached into the Philippines; Magellan’s survivors marvelled at its water-city in 1521. Whittled away by Spain, the Sulu cession, and the White Rajahs of Sarawak until only the modern sultanate’s core remained under British protection (1888).',
+ poly:[[[113.8,4.8],[115.5,5.5],[117.5,5.5],[116.5,3.5],[114,3.8]]],lbl:[115.5,5.2],lz:1.5},
+{id:'maguindanao',n:'Sultanate of Maguindanao',cat:'sasia',s:1515,e:1888,cap:'Cotabato',
+ note:'The great Moro sultanate of Mindanao; under Sultan Kudarat it repelled Spain for decades in the 17th century. Spanish pressure broke its power by the 1880s, and after 1899 the region passed to the United States — whose Moro wars ran on for another decade.',
+ poly:[[[123.8,7.5],[125.5,7.8],[125.8,6.2],[124.2,6.2]]],lbl:[124.8,7.2],lz:1.6}
+);
+
+/* ---- §V7-D Steppe & Central Asia ---- */
+POLITIES.push(
+{id:'cuman_kipchak',n:'Cuman–Kipchak confederation',cat:'steppe',s:1000,e:1240,cap:'(itinerant)',peoples:true,
+ note:'The Turkic lords of the western steppe from the Danube to the Irtysh — the Desht-i Qipchaq, “Kipchak steppe,” bears their name. They fought, married and allied with Rus, Byzantium, Georgia and Hungary; broken at the Kalka (1223) and absorbed into the Golden Horde, whose language became theirs.',
+ poly:[[[30,46],[35,48.5],[45,48.5],[52,46.5],[50,44],[38,44]]],lbl:[42,46.5],lz:1.3},
+{id:'pechenegs',n:'Pechenegs',cat:'steppe',s:850,e:1091,cap:'(itinerant)',peoples:true,
+ note:'The Turkic horse-lords of the Black Sea steppe before the Cumans; they killed Sviatoslav of Kyiv and had his skull made a cup, besieged Constantinople, and were finally annihilated by Byzantium and Cuman allies at Levounion (1091).',
+ poly:[[[27,46],[30,47.5],[34,46.5],[31,44.5]]],lbl:[30.5,46.2],lz:1.5},
+{id:'bashkirs',n:'Bashkir tribal union',cat:'steppe',s:800,e:1557,cap:'(southern Urals)',peoples:true,
+ note:'Turkic pastoralists of the southern Urals, tribute-payers to Bulgar, Horde and Kazan in turn; accepted Muscovite suzerainty after Kazan’s fall (1557) — then rose against it for two more centuries.',
+ poly:[[[54.5,52],[57.5,54.3],[60,53.3],[57.5,51]]],lbl:[57.3,52.7],lz:1.5},
+{id:'great_horde',n:'Great Horde',cat:'steppe',s:1466,e:1502,cap:'(lower Volga)',
+ note:'The rump that still called itself the Golden Horde; its bloodless stand-off with Moscow on the Ugra River (1480) is remembered as the end of the “Tatar yoke.” Destroyed by the Crimean Khanate in 1502.',
+ poly:[[[44.5,46],[47.5,48.3],[52,47.3],[50,45],[46,45]]],lbl:[48,47],lz:1.5},
+{id:'qocho',n:'Qocho (Uyghur kingdom)',cat:'steppe',s:843,e:1209,cap:'Gaochang',
+ note:'After their steppe khaganate fell, Uyghurs built a settled Buddhist-Manichaean kingdom in the Turfan oases — a literate, polyglot Silk Road civilisation whose scribes later staffed the Mongol chancery: the Mongolian script descends from Uyghur letters.',
+ poly:[[[88.5,42],[90.5,43.3],[92.3,42.5],[90.5,41.2]]],lbl:[90.4,42.7],lz:1.5},
+{id:'kara_khanids',n:'Kara-Khanid Khaganate',cat:'steppe',s:840,e:1212,cap:'Balasagun · Kashgar',
+ note:'The first Turkic dynasty to embrace Islam, converting the steppe’s future; under them Kashgar produced the earliest monuments of Turkic letters — Yusuf’s Wisdom of Royal Glory and Mahmud al-Kashgari’s great dictionary of the Turkic tongues.',
+ poly:[[[68,39],[72,40.5],[76.5,39.5],[73,36.8]]],lbl:[72.5,39],lz:1.4}
+);
+
+/* ---- §V7-E Africa ---- */
+POLITIES.push(
+{id:'futa_toro',n:'Futa Toro (Almamate)',cat:'sahel',s:1776,e:1861,cap:'(middle Senegal valley)',
+ note:'The Fulani clerical revolution of 1776 replaced the old dynasty with elected almamys — an Islamic republic on the Senegal whose scholars’ example fed every later West African jihad, including Usman dan Fodio’s. Absorbed into Umar Tal’s Tukulor empire, then France’s.',
+ poly:[[[-14.5,16.3],[-13,16.8],[-12,16],[-14,15.5]]],lbl:[-13.5,16.6],lz:1.8},
+{id:'futa_jallon',n:'Futa Jallon (Imamate)',cat:'sahel',s:1725,e:1896,cap:'Timbo',
+ note:'The Fulani imamate of the Guinean highlands — the first of the great West African jihad states (1725), governed by alternating party-lineages and famous for its Qur’anic schools. Subdued by France in 1896.',
+ poly:[[[-12.5,10.5],[-10.5,11.3],[-9.5,10],[-11.5,9.5]]],lbl:[-11,10.7],lz:1.7},
+{id:'gurma',n:'Gurma Kingdom',cat:'sahel',s:1500,e:1895,cap:'Fada N’Gurma',
+ note:'A Gurmanche kingdom east of the Mossi states, sharing their legendary Dagomba origins; it held the Niger bend’s eastern marches until the French partition of the 1890s.',
+ poly:[[[0,12],[1.5,12.7],[2.2,11.5],[0.5,11]]],lbl:[1,12.2],lz:1.8},
+{id:'darfur',n:'Sultanate of Darfur',cat:'sahel',s:1650,e:1874,cap:'Al-Fashir',
+ note:'The Fur sultanate of the western Sudan, master of the Forty Days’ Road (Darb al-Arbaʿīn) caravan trade to Egypt in ivory, ostrich feathers and slaves. Conquered in 1874 by the slaver-warlord al-Zubayr for Egypt; restored 1898; finally annexed by Britain in 1916.',
+ poly:[[[23.5,12],[25.5,14.3],[27.5,13.5],[26.5,10.8],[24,11]]],lbl:[25.3,12.7],lz:1.5},
+{id:'mahdist_sudan',n:'Mahdist State',cat:'sahel',s:1881,e:1898,cap:'Omdurman',
+ note:'Muhammad Ahmad proclaimed himself the Mahdi in 1881 and swept Turco-Egyptian rule from the Sudan, taking Khartoum over Gordon’s body in 1885. His successor the Khalifa ruled a vast state until Kitchener’s Maxim guns ended it at Omdurman — the atlas’s existing 1898 chronicle entry.',
+ poly:[[[29,17],[33.5,18],[36,14],[32,11],[28,13]]],lbl:[31.5,15],lz:1.4},
+{id:'xhosa',n:'Xhosa kingdoms',cat:'south',s:1500,e:1879,cap:'(amaXhosa chiefdoms)',peoples:true,
+ note:'The Nguni chiefdoms of the eastern Cape who fought nine frontier wars against Boer and Briton across a full century (1779–1879) — the longest colonial war in African history — and endured the self-inflicted catastrophe of the 1856–57 cattle-killing prophecy before final annexation.',
+ poly:[[[26.5,-31.5],[28.5,-31.8],[29,-33.2],[27,-33.5],[26,-32.5]]],lbl:[27.5,-32.5],lz:1.5},
+{id:'sotho',n:'Basotho Kingdom',cat:'south',s:1822,e:1914,cap:'Thaba Bosiu',
+ note:'Moshoeshoe I gathered the refugees of the wars of the 1820s onto the mountain fortress of Thaba Bosiu and forged a nation by diplomacy as much as arms — he never lost his mountain. British protection (1868) preserved Basutoland separate from the Boer republics; it is Lesotho today.',
+ poly:[[[27.5,-28.3],[29.3,-28.6],[29.5,-30],[28,-30]]],lbl:[28.6,-29.2],lz:1.5},
+{id:'khoikhoi',n:'Khoikhoi pastoralists',cat:'south',s:800,e:1800,cap:'(decentralised)',peoples:true,
+ note:'The herding peoples of the Cape whose fat-tailed sheep and cattle sustained them for two millennia before the Dutch station of 1652 grew into a colony on their pastures; smallpox (1713) and dispossession broke the independent chiefdoms, though Khoikhoi ancestry and clicks live on in modern South Africa.',
+ poly:[[[17,-31.5],[19.5,-31.5],[19.8,-33.8],[17.5,-33.5]]],lbl:[18.3,-32.5],lz:1.5}
+);
+
+/* ---- §V7-F Americas & Oceania ---- */
+POLITIES.push(
+{id:'tarascan',n:'Purépecha Empire (Tarascan)',cat:'samerica',s:1300,e:1530,cap:'Tzintzuntzan',
+ note:'Mesoamerica’s second power — and the one the Aztecs could not break: the Purépecha, masters of copper and bronze metallurgy rare in the region, crushed a massive Aztec invasion in the 1470s and fortified their frontier. Their cazonci submitted to Spain without battle in 1522–30; conquest came anyway.',
+ poly:[[[-103,20.3],[-101,20.3],[-100.3,19],[-102,18.5],[-103.2,19.2]]],lbl:[-101.8,19.6],lz:1.4},
+{id:'sican',n:'Sicán (Lambayeque)',cat:'samerica',s:800,e:1375,cap:'Batán Grande',
+ note:'The north-coast Peruvian culture between Moche and Chimú, whose lords were buried seated with tumi knives and masks of hammered gold — some of the richest tombs ever excavated in the Americas. Conquered by Chimor around 1375.',
+ poly:[[[-80.3,-6],[-79.2,-6.3],[-79.2,-7.8],[-80.5,-7.3]]],lbl:[-79.8,-6.8],lz:1.5},
+{id:'chincha',n:'Chincha Kingdom',cat:'samerica',s:1000,e:1476,cap:'Chincha',
+ note:'The merchant kingdom of Peru’s south coast: balsa fleets trading north for Ecuadorian spondylus shell and llama caravans inland — perhaps the Andes’ greatest traders. So valued that the lord of Chincha rode beside Atahualpa at Cajamarca, the only other lord borne in a litter.',
+ poly:[[[-76.5,-13.2],[-75.5,-13.6],[-76,-14.8],[-77,-14.2]]],lbl:[-76.2,-13.9],lz:1.5},
+{id:'zenu',n:'Zenú chiefdoms',cat:'samerica',s:800,e:1600,cap:'Finzenú',
+ note:'Engineers of the Colombian floodplains: half a million hectares of raised-field canals tamed the Sán Jorge wetlands, and Zenú goldsmiths’ filigree drew the Spanish literally to loot their cemeteries. The waterworks outlasted the society that built them.',
+ poly:[[[-75.5,9.3],[-74.3,9.6],[-74.2,8.4],[-75.4,8.4]]],lbl:[-74.9,9],lz:1.7},
+{id:'powhatan',n:'Powhatan Confederacy (Tsenacommacah)',cat:'samerica',s:1570,e:1646,cap:'Werowocomoco',
+ note:'Wahunsenacawh — the paramount chief the English called Powhatan — wove some thirty Algonquian polities into Tsenacommacah before Jamestown landed in his midst (1607). Three Anglo-Powhatan wars, and the diplomacy remembered through his daughter Matoaka (Pocahontas), ended in the treaty of 1646.',
+ poly:[[[-77.5,37],[-76.2,38],[-75.5,37.4],[-76.5,36.5]]],lbl:[-76.6,37.3],lz:1.5},
+{id:'wampanoag',n:'Wampanoag Confederacy',cat:'samerica',s:1500,e:1676,cap:'Sowams · Montaup',
+ note:'The nation of the dawn lands, decimated by epidemic just before the Mayflower arrived on its emptied shore; Ousamequin (Massasoit) chose alliance with Plymouth in 1621. His son Metacom — King Philip — led the great rising of 1675–76, proportionally the bloodiest war in American history, which broke Native power in New England.',
+ poly:[[[-71.8,41.5],[-70.9,42.2],[-69.9,41.6],[-70.9,41.2]]],lbl:[-70.9,42],lz:1.6},
+{id:'natchez',n:'Natchez chiefdom',cat:'samerica',s:1600,e:1731,cap:'Grand Village',
+ note:'The last of the Mississippian world: mound-top temples, a living Great Sun ruler, and the sacred fire — practices the rest of the mound-builder societies had abandoned centuries before. French observers documented it in detail; French treachery destroyed it in the revolt and reprisals of 1729–31. Survivors found refuge among the Muscogee and Cherokee.',
+ poly:[[[-91.8,31.2],[-90.9,31.9],[-90.4,31.4],[-91.3,30.9]]],lbl:[-91.2,31.9],lz:1.6},
+{id:'inuit_thule',n:'Thule Inuit expansion',cat:'samerica',s:1000,e:1500,cap:'(circumpolar)',peoples:true,
+ note:'The ancestors of all modern Inuit: whale-hunting maritime specialists who spread from Alaska across the entire American Arctic to Greenland in mere centuries, absorbing or replacing the Dorset people — the tuniit of Inuit oral tradition — and meeting the Norse coming the other way. One of history’s fastest peaceful-range expansions, made possible by the dog sled, the umiak, and the toggling harpoon.',
+ poly:[[[-165,66],[-140,70],[-110,69],[-85,67],[-60,73],[-40,76.5],[-25,71],[-45,68.5],[-70,66],[-95,64],[-125,64],[-150,63.5]]],lbl:[-100,71.5],lz:1.1},
+{id:'fiji_kingdom',n:'Kingdom of Fiji',cat:'samerica',s:1871,e:1874,cap:'Levuka',
+ note:'Ratu Seru Cakobau, warlord of Bau, was crowned king of a united Fiji in 1871 — a constitutional experiment drowning in settler debt and gunboat claims. He ceded the islands to Britain in 1874; measles brought back from the signing killed a quarter of the population within a year.',
+ poly:[[[177,-17.2],[178.5,-17.5],[178,-18.5],[177,-18.2]]],lbl:[177.7,-16.8],lz:1.6},
+{id:'samoa_kingdom',n:'Samoa (Mālō)',cat:'samerica',s:1830,e:1899,cap:'Apia',
+ note:'The Samoan kingship contested among the great titles — Malietoa foremost — while German, British and American warships backed rival claimants; the 1889 Apia cyclone sank six of them mid-standoff. The Tripartite Convention of 1899 partitioned the islands between Germany and the United States.',
+ poly:[[[-172.8,-13.4],[-171.4,-13.6],[-171.5,-14.3],[-172.8,-14]]],lbl:[-172,-13],lz:1.6},
+{id:'tahiti_kingdom',n:'Kingdom of Tahiti (Pōmare)',cat:'samerica',s:1788,e:1880,cap:'Pape’ete',
+ note:'The Pōmare dynasty unified Tahiti with missionary and trader backing; Queen Pōmare IV resisted the French protectorate of 1842 through open war before accepting it. Her son ceded the kingdom in 1880 — the heart of what became French Polynesia.',
+ poly:[[[-149.6,-17.5],[-149.1,-17.5],[-149.1,-17.9],[-149.6,-17.9]]],lbl:[-149.4,-17.1],lz:1.8}
+);
+
+/* ---- §V7-G Routes ---- */
+ROUTES.push(
+{id:'r_amber',n:'Amber Road (Baltic–Adriatic)',cat:'caravan',s:800,e:1400,dash:true,
+ note:'The old overland artery carrying Baltic amber — “the gold of the north” — through the Moravian Gate to the head of the Adriatic, a route older than Rome; it faded as Hanseatic sea lanes and Venetian galleys rerouted the trade.',
+ pts:[[19.5,54.7],[18.5,52.2],[17,49.7],[16.4,48.2],[15.2,46.7],[13.4,45.77]]},
+{id:'r_polynesia',n:'Polynesian voyaging triangle',cat:'monsoon',s:800,e:1300,
+ note:'The last great chapter of the human settlement of Earth: from the Society Islands, double-hulled canoes navigated by star paths, swells and birds reached Hawaiʻi and Rapa Nui, and — via the Cook Islands, beyond this map’s edge — Aotearoa by about 1300. No instrument-free navigation tradition has ever matched it; its heirs proved it again aboard Hōkūleʻa in 1976.',
+ segs:[[[-149.5,-17.5],[-152.5,-6],[-155,8],[-155.5,19.5]],
+       [[-149.5,-17.5],[-140,-21],[-125,-25],[-109.3,-27.1]],
+       [[-149.5,-17.5],[-155,-19.5],[-159.8,-21.2]]]}
+);
+
+/* ---- §V7-H Cities ---- */
+CITIES.push(
+{n:'Tbilisi',ll:[44.79,41.72],s:800,e:1914},
+{n:'Yerevan',ll:[44.51,40.18],s:800,e:1914,cz:1.3},
+{n:'Muscat',ll:[58.41,23.59],s:800,e:1914},
+{n:'Dhaka',ll:[90.41,23.81],s:1200,e:1914,cz:1.2},
+{n:'Pune',ll:[73.86,18.52],s:1600,e:1914,cz:1.3},
+{n:'Chiang Mai',ll:[98.99,18.79],s:1292,e:1914,cz:1.2},
+{n:'Kashgar',ll:[75.99,39.47],s:800,e:1914},
+{n:'Tzintzuntzan',ll:[-101.58,19.63],s:1300,e:1530,cz:1.2},
+{n:'Batán Grande',ll:[-79.45,-6.45],s:800,e:1375,cz:1.4},
+{n:'Thaba Bosiu',ll:[27.68,-29.32],s:1822,e:1914,cz:1.3},
+{n:'Levuka',ll:[178.83,-17.68],s:1871,e:1914,cz:1.4},
+{n:'Apia',ll:[-171.75,-13.83],s:1830,e:1914,cz:1.4}
+);
+
+/* ---- §V7-I Chronicle: the medieval spine ---- */
+EVENTS.push(
+{y:800,n:'Charlemagne crowned emperor in Rome',ll:[12.5,41.9]},
+{y:843,n:'Treaty of Verdun — the Carolingian partition',ll:[5.2,49]},
+{y:911,n:'Saint-Clair-sur-Épte — Rollo founds Normandy',ll:[1.4,49.2]},
+{y:962,n:'Otto I crowned — the Holy Roman Empire begins',ll:[12.5,41.9]},
+{y:988,n:'Vladimir baptises Kyivan Rus',ll:[30.52,50.45]},
+{y:1095,n:'Urban II preaches crusade at Clermont',ll:[3.08,45.78]},
+{y:1099,n:'Crusaders take Jerusalem',ll:[35.23,31.77]},
+{y:1144,n:'Edessa falls to Zengi — the Second Crusade follows',ll:[38.8,37.15]},
+{y:1187,n:'Hattin — Saladin retakes Jerusalem',ll:[35.44,32.8]},
+{y:1204,n:'Fourth Crusade sacks Constantinople',ll:[28.98,41.01]},
+{y:1215,n:'Magna Carta sealed at Runnymede',ll:[-0.56,51.44]},
+{y:1240,n:'Mongols sack Kyiv',ll:[30.52,50.45]},
+{y:1258,n:'Mongols sack Baghdad — the Abbasid caliphate ends',ll:[44.4,33.3]},
+{y:1291,n:'Acre falls; the Swiss Eternal Alliance is sworn',ll:[8.47,46.97]},
+{y:1325,n:'Tenochtitlan founded by the Mexica',ll:[-99.13,19.43]},
+{y:1348,n:'The Black Death enters Europe through Genoese ports',ll:[8.93,44.41]},
+{y:1453,n:'Constantinople falls to Mehmed II',ll:[28.98,41.01]},
+{y:1555,n:'Peace of Augsburg — cuius regio, eius religio',ll:[10.9,48.37]},
+{y:1588,n:'The Spanish Armada is broken',ll:[-5,49.5]},
+{y:1648,n:'Peace of Westphalia — the modern state system',ll:[7.63,51.96]},
+{y:1683,n:'The siege of Vienna is broken',ll:[16.37,48.21]},
+{y:1707,n:'Act of Union — Great Britain created',ll:[-3.2,55.9]},
+{y:1789,n:'The Bastille falls — French Revolution',ll:[2.37,48.85]},
+{y:1815,n:'Congress of Vienna redraws Europe',ll:[16.37,48.21]},
+{y:1839,n:'First Opium War begins',ll:[113.3,23.1]},
+{y:1848,n:'Springtime of Nations — revolutions across Europe',ll:[10.5,50]},
+{y:1857,n:'The Indian Rebellion; the Crown displaces the Company',ll:[77.2,28.6]},
+{y:1870,n:'Sedan — France falls, a German Empire rises',ll:[4.94,49.7]},
+{y:1905,n:'Tsushima — Japan defeats Russia at sea',ll:[129.5,34.3]},
+{y:1911,n:'Xinhai Revolution — the Qing dynasty falls',ll:[114.3,30.6]}
+);
+
 </script>
 <script>
 /* ============================================================
@@ -1341,6 +1832,7 @@ function viewTo(b,idx){ // [lonMin,latMin,lonMax,latMax]
   const ar=MW/MH, br=w/h;
   if(br>ar){VP.w=w;VP.h=w/ar;VP.x=x;VP.y=y-(VP.h-h)/2}
   else{VP.h=h;VP.w=h*ar;VP.y=y;VP.x=x-(VP.w-w)/2}
+  if(SOUTH){VP.x=MW-VP.x-VP.w;VP.y=MH-VP.y-VP.h} /* §V5-A */
   VP.viewIdx=idx;
   if(reduceMotion||!isFinite(VP._px)){snapVP();return}
   const from={x:VP._px,y:VP._py,w:VP._pw,h:VP._ph},to={x:VP.x,y:VP.y,w:VP.w,h:VP.h};
@@ -1358,6 +1850,44 @@ function snapVP(){applyVP()}
 const zb=$('#zoombar');
 VIEWS.forEach((v,i)=>{const b=document.createElement('button');b.textContent=v.n;
   b.onclick=()=>viewTo(v.b,i);zb.appendChild(b)});
+
+/* ============================================================
+   §V5-A ORIENTATION — South-Up / North-Up
+   Rotating every layer 180° about the map centre is identical to
+   flipping the projection; each <text> is counter-rotated about its
+   own anchor so names stay readable. viewTo and double-tap consult
+   SOUTH; drag/pinch/wheel are screen-space and need no changes.
+   ============================================================ */
+const WORLD_GROUPS=[...svg.querySelectorAll(':scope > g')];
+function applyOrientation(){
+  const t=SOUTH?`rotate(180 ${MW/2} ${MH/2})`:null;
+  WORLD_GROUPS.forEach(g=>t?g.setAttribute('transform',t):g.removeAttribute('transform'));
+  svg.querySelectorAll('text').forEach(tx=>{
+    if(SOUTH)tx.setAttribute('transform',`rotate(180 ${tx.getAttribute('x')} ${tx.getAttribute('y')})`);
+    else tx.removeAttribute('transform');
+  });
+  VP.x=MW-VP.x-VP.w; VP.y=MH-VP.y-VP.h; /* keep the same region in view */
+  applyVP();
+}
+const orientBtn=document.createElement('button');
+orientBtn.id='orientBtn';
+orientBtn.textContent='⇅ South-Up';
+orientBtn.title='Flip the map — north-up is a convention, not a law';
+orientBtn.onclick=()=>{SOUTH=!SOUTH;
+  orientBtn.textContent=SOUTH?'⇅ North-Up':'⇅ South-Up';
+  orientBtn.classList.toggle('act',SOUTH);
+  applyOrientation()};
+zb.insertBefore(orientBtn, zb.firstChild);
+
+/* ============================================================
+   §V5-C KEYBOARD — ←/→ step the year (Shift = ±10)
+   ============================================================ */
+window.addEventListener('keydown',e=>{
+  if(e.target&&e.target.tagName==='INPUT')return;
+  const step=e.shiftKey?10:1;
+  if(e.key==='ArrowRight')setYear(Math.min(1914,YEAR+step));
+  else if(e.key==='ArrowLeft')setYear(Math.max(800,YEAR-step));
+});
 POLITIES.forEach(p=>{if(p.pz)return;const bb=bboxOf(p);
   if((bb[2]-bb[0])*(bb[3]-bb[1])<8)p.pz=1.25});
 viewTo(VIEWS[0].b,0);
@@ -1383,7 +1913,8 @@ const endPtr=e=>{
     const now=performance.now();
     if(now-dtT<320&&dtP&&Math.hypot(e.clientX-dtP[0],e.clientY-dtP[1])<44){
       const r=wrap.getBoundingClientRect();
-      const mx=VP.x+(e.clientX-r.left)/r.width*VP.w, my=VP.y+(e.clientY-r.top)/r.height*VP.h;
+      let mx=VP.x+(e.clientX-r.left)/r.width*VP.w, my=VP.y+(e.clientY-r.top)/r.height*VP.h;
+      if(SOUTH){mx=MW-mx;my=MH-my} /* §V5-A: tap is in rotated space */
       const w=Math.max(150,VP.w/2.2);
       const iLon=x=>x/PROJ.S+PROJ.LON_MIN, iLat=y=>PROJ.LAT_MAX-y/PROJ.S;
       viewTo([iLon(mx-w/2),iLat(my+w*MH/MW/2),iLon(mx+w/2),iLat(my-w*MH/MW/2)],-1);
@@ -1494,7 +2025,7 @@ document.querySelectorAll('.ptabs button[data-tab]').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('.ptabs button[data-tab]').forEach(x=>x.classList.toggle('act',x===b));
   renderPanel(true);
 });
-const GROUP_ORDER=['sahel','forest','central','east','south','nafrica','europe','samerica','colonial'];
+const GROUP_ORDER=['sahel','forest','central','east','south','nafrica','europe','steppe','easia','sasia','samerica','colonial']; /* §V6 fix: Asia was missing from the index */
 let panelDirty=true;
 function renderPanel(force){
   const body=$('#panelBody');
@@ -1521,7 +2052,7 @@ function renderPanel(force){
     html+='</div>';
   }
   if(TAB==='all'){
-    const evs=EVENTS.filter(ev=>!SQ||ev.n.toLowerCase().includes(SQ));
+    const evs=EVENTS.filter(ev=>!SQ||ev.n.toLowerCase().includes(SQ)).sort((a,b)=>a.y-b.y);
     if(evs.length){
       html+='<div class="grp"><h3>Chronicle of events</h3>';
       evs.forEach(ev=>{html+=`<div class="row evr${ev.y>YEAR?' gone':''}" data-y="${ev.y}" tabindex="0"><span class="yrs">${ev.y}</span><span class="nm" style="font-size:11px">${ev.n}</span></div>`});
