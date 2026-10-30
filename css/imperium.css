@@ -32,7 +32,8 @@ button { cursor: pointer; }
 .hidden { display: none !important; }
 
 /* ---------- stage ---------- */
-#globeViz { position: absolute; inset: 0; z-index: 0; cursor: grab; }
+#globeViz { position: absolute; inset: 0; z-index: 0; cursor: grab; touch-action: none; -webkit-touch-callout: none; }
+html, body { overscroll-behavior: none; touch-action: manipulation; }
 #globeViz:active { cursor: grabbing; }
 .overlay { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
 .warroom-grid {
@@ -308,7 +309,9 @@ input[type=range].chronos-slider::-moz-range-thumb { height: 16px; width: 16px; 
   #hud { padding: 8px 10px; }
   #hud h1 em, .kicker .live-dot { display: none; }
   #hud h1 { font-size: 16px; }
-  .controls .btn-ghost span:not(#spinLbl) { display: none; }
+  #hud .brand .kicker { display: none; }               /* phone: reclaim header height */
+  .side.left, .side.right { top: 46vh; bottom: 132px; } /* phone: panels are a bottom sheet, globe stays visible above */
+  .controls .btn-ghost span:not(#spinLbl) { font-size: 10px; }   /* keep Arcs / Routes labelled on phones */
   #btnSpin, #btnReset { display: none; }
   .btn-accra span { display: none; }
   .side.left, .side.right { left: 8px; right: 8px; width: auto; }

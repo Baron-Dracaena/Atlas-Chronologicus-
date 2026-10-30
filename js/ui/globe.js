@@ -348,16 +348,12 @@ IMP.GlobeView = (function () {
       .polygonCapCurvatureResolution(1.5)
       .polygonLabel(f => (f.__kind === 'ledger' ? ledgerTip(f) : polityTip(f.__ref)))
       .onPolygonHover(f => { container.style.cursor = f ? 'pointer' : 'grab'; })
-      .onPolygonClick(f => {
-        if (!f) return;
-        if (f.__kind === 'ledger') IMP.App.select({ type: 'territory', id: f.__key }, { fly: true });
-        else IMP.App.select({ type: 'polity', id: f.__ref.id }, { fly: false });
-      })
-      .onGlobeClick(() => IMP.App.select(null))
+      .onPolygonClick(f => { if (!touchOwned()) pickFeature(f); })
+      .onGlobeClick(() => { if (!touchOwned()) IMP.App.select(null); })
       .pathPoints('seg').pathPointLat(p => p[1]).pathPointLng(p => p[0]).pathPointAlt(0.004)
       .pathResolution(2).pathTransitionDuration(1400)
       .pathLabel(p => p.r ? `<div class="tip"><div class="tip-h"><span>${p.r.s}–${p.r.e}</span><span class="pill grey">${(A.RCATN[p.r.cat] || '').toUpperCase()}</span></div><b>${p.r.n}</b><div class="f">click for the route dossier →</div></div>` : `<div class="tip"><b>${p.m.n}</b><div class="r">Treaty meridian dividing the Iberian claims.</div></div>`)
-      .onPathClick(p => { if (p && p.r) IMP.App.select({ type: 'route', id: p.r.id }, { fly: false }); })
+      .onPathClick(p => { if (!touchOwned() && p && p.r) IMP.App.select({ type: 'route', id: p.r.id }, { fly: false }); })
       .onPathHover(p => { container.style.cursor = p ? 'pointer' : 'grab'; })
       .arcColor('color').arcDashLength(0.45).arcDashGap(0.2).arcDashAnimateTime(2200).arcStroke(0.5)
       .arcAltitudeAutoScale(0.35).arcLabel('label').arcsTransitionDuration(600)
@@ -375,8 +371,77 @@ IMP.GlobeView = (function () {
     controls.enableDamping = true; controls.dampingFactor = 0.08;
     controls.minDistance = 118; controls.maxDistance = 520;
     globe.pointOfView({ lat: 18, lng: 14, altitude: 2.15 }, 0);
+    /* phones report devicePixelRatio 3; drawing at 2 looks the same and
+       cuts the GPU fill work by more than half, so zoom/rotate stay smooth */
+    globe.renderer().setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+    installTouchTaps(container);
+    /* no hover on phones: a tooltip opened by a tap never gets a "leave" and
+       sticks on screen. Taps open the dossier instead, so drop the tooltips. */
+    if (matchMedia('(hover: none)').matches) globe.polygonLabel(() => '').pathLabel(() => '').arcLabel(() => '');
     addEventListener('resize', () => globe.width(innerWidth).height(innerHeight));
     return globe;
+  }
+
+  /* =====================================================================
+     TOUCH TAPS
+     globe.gl decides what was clicked from the last *hover*. Phones have no
+     hover, so taps hit stale objects or nothing. On touch we resolve the tap
+     ourselves: screen -> lat/lng -> which drawn polygon contains it (topmost
+     wins), then swallow the library's own click for that gesture.
+     ===================================================================== */
+  let touchUntil = 0;
+  const touchOwned = () => performance.now() < touchUntil;
+
+  function pickFeature(f) {
+    if (!f) return;
+    if (f.__kind === 'ledger') IMP.App.select({ type: 'territory', id: f.__key }, { fly: true });
+    else IMP.App.select({ type: 'polity', id: f.__ref.id }, { fly: false });
+  }
+
+  function featureAt(lat, lng) {
+    const pt = [lng, lat];
+    let best = null, bestAlt = -1;
+    (globe.polygonsData() || []).forEach(f => {
+      if (!f || !f.geometry) return;
+      /* hand-drawn rings can wind the "wrong" way, which d3 reads as the
+         whole sphere minus the shape; detect that once and invert the test */
+      if (f.__inv === undefined) { try { f.__inv = d3.geoArea(f) > 2 * Math.PI; } catch (e) { f.__inv = false; } }
+      let inside = false;
+      try { inside = d3.geoContains(f, pt) !== f.__inv; } catch (e) { return; }
+      if (!inside) return;
+      const st = style.get(f), alt = st ? st.alt : 0;
+      if (alt >= bestAlt) { bestAlt = alt; best = f; }   /* nested overlays sit higher, so they win */
+    });
+    return best;
+  }
+
+  function installTouchTaps(el) {
+    const down = new Map();          /* pointerId -> {x, y, t} */
+    let multi = false;               /* a pinch happened during this gesture */
+    el.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'touch') return;
+      down.set(e.pointerId, { x: e.clientX, y: e.clientY, t: performance.now() });
+      if (down.size > 1) multi = true;
+    }, true);
+    const end = e => {
+      if (e.pointerType !== 'touch') return;
+      const d = down.get(e.pointerId); down.delete(e.pointerId);
+      if (!d) return;
+      touchUntil = performance.now() + 600;          /* the library never acts on touch */
+      const wasMulti = multi; if (!down.size) multi = false;
+      if (wasMulti || e.type === 'pointercancel') return;
+      const moved = Math.hypot(e.clientX - d.x, e.clientY - d.y), dt = performance.now() - d.t;
+      if (moved > 10 || dt > 450) return;            /* that was a drag or a hold, not a tap */
+      const r = el.getBoundingClientRect();
+      const c = globe.toGlobeCoords(e.clientX - r.left, e.clientY - r.top);
+      if (!c) { IMP.App.select(null); return; }       /* tapped space */
+      const f = featureAt(c.lat, c.lng);
+      if (f) pickFeature(f); else IMP.App.select(null);
+    };
+    el.addEventListener('pointerup', end, true);
+    el.addEventListener('pointercancel', end, true);
+    /* iOS Safari: stop a pinch on the globe from zooming the whole page */
+    ['gesturestart', 'gesturechange'].forEach(t => el.addEventListener(t, e => e.preventDefault(), { passive: false }));
   }
 
   return {

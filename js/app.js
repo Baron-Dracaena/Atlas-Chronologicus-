@@ -13,7 +13,7 @@ IMP.App = (function () {
 
   const state = {
     t: C.sampleOfYear(800), sel: null, empire: null, view: null,
-    tab: 'year', phase: 'ALL', query: '', arcs: true, routes: true, spinning: false, playing: false
+    tab: 'year', phase: 'ALL', query: '', arcs: innerWidth > 760, routes: true, spinning: false, playing: false
   };
   const app = { state, audit: [] };
 
