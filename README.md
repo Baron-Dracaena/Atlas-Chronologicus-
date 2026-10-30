@@ -84,18 +84,8 @@ Atlas content uses the original Atlas schema, so you add it to the arrays the sa
 | `0` | Reset the view |
 | `D` | Health readout: renders, DOM nodes, polygons, labels. These numbers must not keep climbing. |
 
-## Earlier build in this folder
+## Lineage
 
-These files belong to the earlier 2D Atlas build and are not loaded by the globe:
-
-- `Atlas.js`, `Atlas.css` and `Static/index.html`: the SVG atlas.
-- `Extract.js` and `compiler.py`: a planned HTML → GeoJSON → JSON pipeline.
-- `Data/Polities.json`: a data export.
-
-From them, the globe has taken:
-
-- the two data corrections in `Polities.json` (Liberia, Morocco);
-- the compiler's coordinate sanity checks, now part of the audit;
-- the earlier engine's rule against rebuilding unchanged DOM, plus its ↑/↓, `0` and `D` keys.
+v3.0 carries forward fixes from the earlier builds: two data corrections (Liberia, Morocco), coordinate sanity checks from the old compiler (now part of the audit), and the old engine's rule against rebuilding unchanged DOM, along with its ↑/↓, `0` and `D` keys. The last single-file build is preserved under the `v2-legacy` tag.
 
 **Deep links** look like this: `#t=1947.62&sel=territory:356&emp=UK`
